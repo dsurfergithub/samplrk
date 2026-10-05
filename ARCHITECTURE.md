@@ -37,6 +37,7 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Pitch** | `pitch.js` | Puro. Semitonos ↔ rate ↔ duración. |
 | **Teclado** | `keyboardMap.js` | Puro. `KeyboardEvent.code` → pad (`1 2 3 4 / Q W E R / A S D F / Z X C V`). |
 | **Coach** | `coachEngine.js` | Puro y determinista. Define *flip* de forma única (`flipKind`: reordenar/repetir chops, pitch o reverse = transformar el sample respecto al original). Clasifica frases (orden original / flip / stutter) y reacciona a eventos (`cut:confirmed`, `loop:on`, `chops:created`, `pad:hit`, `pitch:changed`, `reverse:on`). Mensajes `learned` (vocabulario, una vez) y `hint` (ignorables). |
+| **Misiones** | `missions.js` | Puro. Las 9 misiones del Modo Aprendizaje (pantalla, instrucción, condición de cumplimiento, texto de éxito, dato histórico opcional), misión actual, «recién cumplida», lista Sampling Basics y mensajes del coach que una misión ya cubre. |
 | **Cortes** | `cutHints.js` | Puro. «Hay un golpe cerca del inicio» y «el loop no empalma», en lenguaje humano. Solo sugiere. |
 | **Análisis** | `analysisEngine.js` → `analysisWorker.js` → `dsp.js` | BPM, fase, tonalidad, golpes (transitorios), silencios, energía. Corre en segundo plano al abrir un audio; alimenta «Detectar golpes» y las pistas de corte. |
 | **Onda** | `waveformPeaks.js` | Mono + tabla min/max por bloques de 128 muestras, cacheada por buffer. Dibujar una columna agrega bloques, no muestras. |
@@ -71,7 +72,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí (Fase 5) |
 | `uiStore` | Pantalla, chop seleccionado, herramienta, toasts, «ocupado» | No |
 | `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | No |
-| `learningStore` | Progreso (`findComplete`… `resampleComplete`), mensajes vistos, coach on/off | Sí (Fase 5) |
+| `learningStore` | Progreso (`findComplete`… `resampleComplete`), misiones saltadas y cerradas, «explorando», mensajes vistos, coach on/off | Sí (Fase 5) |
 
 `createStore()` es el mismo patrón `useSyncExternalStore` de v0.1, sin dependencias.
 
@@ -84,7 +85,13 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | Find + Cut + Loop | `CutLab` (escuchar → «Aquí hay algo» → INICIO/FIN → Repetir → «Este es mi sample») |
 | Chop + Play | `ChopLab`, `ChopTools`, `PadGrid`/`Pad`, `ChopInspector` |
 | Record | `RecordLab`, `TempoControl`, `PatternLane` (+ `TransportMini` en la barra superior) |
-| Comunes | `Waveform` (+ `WaveOverview`), `StepBar`, `CoachLine`, `AudioGate`, `Toast` |
+| Comunes | `Waveform` (+ `WaveOverview`), `MissionHead`, `StepBar`, `ProgressPanel`, `CoachLine`, `AudioGate`, `Toast` |
+
+### Modo Aprendizaje vs Modo Libre
+
+`project.mode` decide. En Aprendizaje, `MissionHead` sustituye la cabecera de la pantalla por la misión actual
+(o por «Misión cumplida → Seguir / Quedarme»), el inspector revela las transformaciones poco a poco y el coach calla
+lo que la misión ya explica. En Libre, cabeceras normales, todo visible y coach apagado por defecto.
 
 `Waveform` tiene dos capas: *base* (se redibuja al cambiar datos o vista) y *live* (rAF con `getLive()` → playheads + chops sonando).
 Los pads suenan en `pointerdown`; el teclado usa `click` (Enter/Espacio con foco) y el mapa global de teclas.

@@ -345,3 +345,45 @@ Limitaciones conocidas:
 - Un solo pattern por proyecto y una sola toma (sin overdub ni tomas múltiples, previstas para más adelante).
 - En segundo plano el navegador frena los temporizadores: el pattern puede trastabillar si la pestaña no está visible.
 - Sigue sin persistencia (Fase 5).
+
+---
+
+## 11. Fase 3 — Learning Mode (cerrada)
+
+**Objetivo:** que alguien que nunca ha sampleado complete Escuchar → Cortar → Loop → Chop → Tocar → Flip → Grabar → Pitch → Reverse
+sin documentación externa, aprendiendo haciendo.
+
+Implementado:
+- `missions.js` (puro): 9 misiones en orden — find, loop, cut, chop, play, reorder, record, pitch, reverse — cada una con su pantalla,
+  una instrucción, la condición real que la cumple, un texto de «misión cumplida» y, en algunas, un «¿Sabías que…?» histórico opcional.
+  Batería y resampling aparecen como «pronto».
+- **La cabecera de cada pantalla es la misión** (`MissionHead`): una sola instrucción, sin ventanas modales ni «Siguiente».
+  Al cumplirla: «Misión N cumplida» + **[Seguir]** / **[Quedarme aquí y experimentar]**. Siempre: **Ya sé hacer esto · Saltar**.
+  Si la misión está en otra pantalla (o estás experimentando), solo un indicador discreto «Misión N: … →».
+- Las misiones se cumplen con acciones reales: marcar un momento, pulsar Repetir, confirmar el corte, crear chops, 4 golpes de pad,
+  una frase fuera del orden original, una toma grabada, un cambio de pitch, un reverse. Nada se bloquea: se pueden hacer en cualquier orden.
+- **Sampling Basics** (`ProgressPanel`): lista de conceptos practicados (nunca una nota de calidad), cambio de modo Aprendizaje / Libre
+  y reiniciar progreso.
+- **Revelado progresivo** en el inspector (solo Aprendizaje): primero «Transformar este chop», después pitch, y luego reverse y volumen,
+  según avanzan las misiones. Un botón lo abre todo en cualquier momento.
+- **Una sola voz por concepto**: en Aprendizaje el coach no repite lo que ya explica la misión (chop, flip, pattern, pitch…);
+  sigue dando las pistas que ninguna misión cubre (groove, quantize, stutter, corte largo, toma vacía).
+- **Modo Libre**: sin misiones, coach apagado por defecto, todo disponible.
+- Móvil: el recorrido (Find · Cut · Chop · Play · Record · Flip) baja a una segunda fila deslizable de la barra superior, así se puede
+  navegar libremente también con el pulgar.
+- CUT: enlace «usar la grabación entera».
+
+Corregido durante la fase:
+- **Arrastre sobre la onda justo después de abrirla**: si se empezaba a arrastrar antes de que el componente midiera su ancho,
+  el tiempo se calculaba dividiendo por cero y el corte quedaba con duración infinita. Ahora se mide al momento y los tiempos
+  se limitan a la grabación; `confirmCut` además rechaza cortes no válidos.
+
+Verificado (`npm test`: 96 tests; build; navegador a 1280 px y 375 px):
+- Recorrido completo de las 9 misiones con acciones reales, «¿Sabías que…?», Seguir, Saltar, Quedarme (con indicador),
+  lista 9/9, cambio a Modo Libre y reinicio. Sin errores de consola ni scroll horizontal.
+- Regresión de Fases 1 y 2 (herramientas de chop, importación, grabación y quantize) en verde.
+
+Limitaciones conocidas:
+- El progreso de aprendizaje se pierde al recargar (Fase 5, persistencia).
+- Si se reinicia el progreso con un proyecto ya trabajado, las misiones vuelven a pedir acciones ya hechas (se pueden saltar).
+- Retos («haz un beat con solo 4 chops»…) y tarjetas históricas ampliadas quedan para más adelante.
