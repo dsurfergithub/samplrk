@@ -31,6 +31,9 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Sampler** | `samplerEngine.js` | Voces de pad. Cada disparo = un `AudioBufferSourceNode` nuevo sobre el buffer original con offset (sin copiar audio). Pitch por `playbackRate` (old school: cambia la duración). Reverse con un buffer invertido cacheado por sample. Micro-fades anti-clic, polifonía con robo de voz, re-disparo del mismo pad corta su voz anterior. Emite eventos `start/end` para la UI. |
 | **Sample** | `sampleEngine.js` | `EditableSample` (sin cambios de v0.1) y registro runtime `id → AudioBuffer`. |
 | **Slices** | `sliceModel.js` | Puro. Crear (iguales / en golpes), dividir, unir, borrar, mover bordes enlazados; banco de 16 pads que referencia slices por id; orden original para el coach. |
+| **Patterns** | `patternEngine.js` | Puro. Eventos en beats (no audio), quantize no destructivo, ventanas para el scheduler, tap tempo y BPM inicial. |
+| **Secuenciador** | `sequencer.js` | Scheduler *lookahead* (25 ms / 120 ms) sobre el reloj del AudioContext: cuenta atrás, grabación y bucle; cambio de tempo sin saltos. La UI consulta `position()` por rAF y solo se suscribe a cambios de fase. |
+| **Metrónomo** | `metronomeEngine.js` | Clics con acento y volumen propio; cancelables al parar. |
 | **Pitch** | `pitch.js` | Puro. Semitonos ↔ rate ↔ duración. |
 | **Teclado** | `keyboardMap.js` | Puro. `KeyboardEvent.code` → pad (`1 2 3 4 / Q W E R / A S D F / Z X C V`). |
 | **Coach** | `coachEngine.js` | Puro y determinista. Define *flip* de forma única (`flipKind`: reordenar/repetir chops, pitch o reverse = transformar el sample respecto al original). Clasifica frases (orden original / flip / stutter) y reacciona a eventos (`cut:confirmed`, `loop:on`, `chops:created`, `pad:hit`, `pitch:changed`, `reverse:on`). Mensajes `learned` (vocabulario, una vez) y `hint` (ignorables). |
@@ -51,7 +54,13 @@ Project  { schemaVersion, id, name, createdAt, updatedAt, mode: 'learning'|'free
 Slice    { id, sampleId, start, end, name, color, pitch, gain, reversed,
            triggerMode: 'oneshot', fadeInMs, fadeOutMs, keyBinding, midiNote }
 PadBank  { id, name, pads: (sliceId | null)[16] }
+Pattern  { id, name, bars, bpm, quantize: 'off'|'1/4'|'1/8'|'1/16',
+           events: [{ id, padId, beat, time, duration, velocity }] }
 ```
+
+Un evento de pattern guarda el **pad** y el **beat** de tu toma original: nunca audio. El quantize se aplica al
+reproducir, así que «Original» siempre está disponible. Al reproducir, cada evento busca qué chop hay en su pad,
+de modo que cambiar pitch o reverse se oye en la toma al instante.
 
 El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es la posición del pad.
 
@@ -61,6 +70,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 |---|---|---|
 | `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí (Fase 5) |
 | `uiStore` | Pantalla, chop seleccionado, herramienta, toasts, «ocupado» | No |
+| `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | No |
 | `learningStore` | Progreso (`findComplete`… `resampleComplete`), mensajes vistos, coach on/off | Sí (Fase 5) |
 
 `createStore()` es el mismo patrón `useSyncExternalStore` de v0.1, sin dependencias.
@@ -73,6 +83,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | Find | `SourcePicker` (cajas de discos de práctica + importar) |
 | Find + Cut + Loop | `CutLab` (escuchar → «Aquí hay algo» → INICIO/FIN → Repetir → «Este es mi sample») |
 | Chop + Play | `ChopLab`, `ChopTools`, `PadGrid`/`Pad`, `ChopInspector` |
+| Record | `RecordLab`, `TempoControl`, `PatternLane` (+ `TransportMini` en la barra superior) |
 | Comunes | `Waveform` (+ `WaveOverview`), `StepBar`, `CoachLine`, `AudioGate`, `Toast` |
 
 `Waveform` tiene dos capas: *base* (se redibuja al cambiar datos o vista) y *live* (rAF con `getLive()` → playheads + chops sonando).

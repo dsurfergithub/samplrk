@@ -313,3 +313,35 @@ Verificado con `npm test` (63 tests), `npm run build` y recorridos automáticos 
    agrupados bajo «Flip». El coach explica el término con la primera reordenación y recuerda que pitch y
    reverse también son flips.
 3. **Teclado**: se mantiene `1 2 3 4 / Q W E R` (16 pads: `+ A S D F / Z X C V`).
+
+---
+
+## 10. Fase 2 — Pattern Recorder (cerrada)
+
+**Objetivo:** grabar lo que tocas, oírlo en bucle y decidir; ajustar al ritmo solo si quieres.
+
+Implementado:
+- `patternEngine.js` (puro): eventos en **beats** (la toma sobrevive a cambios de BPM o pitch), golpes anticipados
+  al «1» envueltos al final del loop, quantize **no destructivo** (`effectiveEvents`), ventanas de scheduling, tap tempo,
+  ×2 / ÷2, BPM inicial (pista del disco → detector si se fía → 90).
+- `sequencer.js`: scheduler *lookahead* (tick 25 ms, ventana 120 ms) sobre el reloj del AudioContext; cuenta atrás,
+  grabación y bucle en la misma línea de tiempo; cambio de BPM sin saltos; la UI solo recibe cambios de fase.
+- `metronomeEngine.js`: clics con acento y volumen independiente; opcional (apagado por defecto); la cuenta atrás siempre suena.
+- Pantalla **RECORD**: tempo (± / ÷2 / ×2 / Tap, con «este disco va a 120 BPM»), pattern como bloques de colores del chop,
+  playhead y cuenta atrás 4-3-2-1 por rAF, Grabar / Escuchar, 1-2-4 compases, cuenta atrás y metrónomo,
+  **¿Te la quedas?** (Quedármela / Otra toma / Descartar), **antes/después** del quantize (Original · 1/4 · 1/8 · 1/16) con dos filas.
+- El pad nunca se cuantiza al tocar: el golpe suena al instante y se anota con la hora real del AudioContext.
+- Play/stop del pattern siempre visible en la barra superior: se puede dejar sonando y cambiar pitch/reverse en el Chop Lab.
+- Coach: «has grabado tu primer pattern… SAMPLRK anota qué pad y cuándo, no audio», «esto se llama quantize», y al volver
+  a Original «el groove no siempre significa tocar exactamente sobre la rejilla». Una toma reordenada también cuenta como flip.
+
+Verificado (`npm test`: 86 tests; build; navegador a 1280 px y 375 px):
+- 8 golpes tocados a tiempos conocidos a 120 BPM → anotados con ±0,02 beats (≈10 ms), incluido uno fuera de rejilla (1,62 → 1,64).
+- Quantize 1/4 → [0, 1, 2, 2, 4, 5, 6, 7] con la toma original visible encima; deshacer devuelve el ajuste anterior.
+- La toma suena en bucle tras grabar; Quedármela / Otra toma; paso RECORD marcado; sin scroll horizontal a 375 px.
+
+Limitaciones conocidas:
+- Sin compensación de latencia de salida (con auriculares Bluetooth la toma puede quedar algo retrasada). Fase futura: calibración.
+- Un solo pattern por proyecto y una sola toma (sin overdub ni tomas múltiples, previstas para más adelante).
+- En segundo plano el navegador frena los temporizadores: el pattern puede trastabillar si la pestaña no está visible.
+- Sigue sin persistencia (Fase 5).
