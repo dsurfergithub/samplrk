@@ -10,6 +10,8 @@ const store = createStore({
   busy: null,              // texto de operación en curso
   toast: null,             // { text, tone: 'info' | 'error' }
   cutDraft: null,          // { start, end, mark } mientras se elige el fragmento
+  transformOpen: false,    // Aprendizaje: el usuario abrió las transformaciones antes de su misión
+  moreOpen: false,         // Aprendizaje: idem para reverse y volumen
 })
 
 export const useUi = store.use

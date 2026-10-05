@@ -50,7 +50,7 @@ function startWithBuffer(buffer, name, origin, extra = {}) {
   stopAllVoices()
   clearHits()
   const sample = { ...createEditableSample({ name, buffer, source: origin.kind }), origin, ...extra }
-  const project = createProject()
+  const project = createProject({ mode: getProject().mode })
   project.samples = [sample]
   project.activeSampleId = sample.id
   replaceProject(project)
@@ -132,6 +132,10 @@ export { stopPreview }
 export function confirmCut(start, end) {
   const sample = getActiveSample()
   if (!sample) return
+  // defensa: un corte siempre es un tramo válido dentro de la grabación
+  start = Math.max(0, Math.min(start, sample.duration))
+  end = Math.max(0, Math.min(end, sample.duration))
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end - start < 0.05) return
   stopPreview()
   commit(p => ({
     ...p,

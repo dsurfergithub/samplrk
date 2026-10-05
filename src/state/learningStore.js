@@ -6,11 +6,17 @@ import { createStore } from './createStore'
 
 export const PROGRESS_KEYS = [
   'findComplete', 'cutComplete', 'loopComplete', 'chopComplete', 'playComplete',
-  'recordComplete', 'flipComplete', 'pitchComplete', 'drumsComplete', 'resampleComplete',
+  'reorderComplete', 'recordComplete', 'flipComplete', 'pitchComplete', 'reverseComplete',
+  'drumsComplete', 'resampleComplete',
 ]
 
+export const emptyProgress = () => Object.fromEntries(PROGRESS_KEYS.map(k => [k, false]))
+
 const store = createStore({
-  progress: Object.fromEntries(PROGRESS_KEYS.map(k => [k, false])),
+  progress: emptyProgress(),
+  skipped: [],             // misiones saltadas («ya sé hacer esto»)
+  acked: [],               // misiones cumplidas ya cerradas con «Seguir» / «Quedarme»
+  exploring: false,        // «Quedarme aquí y experimentar»: la misión siguiente espera discreta
   seen: [],                // ids de mensajes del coach ya mostrados
   message: null,           // { id, kind, text, term? }
   coachEnabled: true,
