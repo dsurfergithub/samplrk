@@ -47,8 +47,11 @@ export default function Waveform({
   }, [])
 
   const sorted = useMemo(() => [...slices].sort((a, b) => a.start - b.start), [slices])
-  const toX = (t) => (t - view.t0) / (view.t1 - view.t0) * size.w
-  const toT = (x) => view.t0 + (x / size.w) * (view.t1 - view.t0)
+  // Ancho real: si el ResizeObserver aún no ha medido (justo tras montar), se mide
+  // al momento. Sin esto, un arrastre muy rápido dividiría por cero (tiempo = Infinity).
+  const width = () => size.w || baseRef.current?.getBoundingClientRect().width || 1
+  const toX = (t) => (t - view.t0) / (view.t1 - view.t0) * width()
+  const toT = (x) => Math.max(0, Math.min(duration, view.t0 + (x / width()) * (view.t1 - view.t0)))
 
   // ------------------------------------------------------------ capa base
   useEffect(() => {
