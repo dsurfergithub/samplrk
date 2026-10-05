@@ -25,6 +25,7 @@ const store = createStore({
 export const useLearning = store.use
 export const getLearning = store.get
 export const setLearning = store.set
+export const subscribeLearning = store.subscribe
 
 export function markProgress(key) {
   store.set(s => (s.progress[key] ? null : { progress: { ...s.progress, [key]: true } }))

@@ -10,6 +10,8 @@ import { setRecorder } from '../state/recorderStore'
 import { decodeFile, friendlyAudioError } from '../engines/audioImport'
 import { renderPracticeSample, PRACTICE_SAMPLES } from '../engines/demo/practiceSamples'
 import { createProject } from '../engines/projectModel'
+import { defaultProjectName } from '../engines/persistModel'
+import { flushSave, saveSampleAudio } from './projectActions'
 import { commit, getProject, replaceProject } from '../state/projectStore'
 import { setUi, showToast } from '../state/uiStore'
 import { notify, clearHits } from './learningActions'
@@ -44,13 +46,14 @@ export function getActiveBuffer(project = getProject()) {
 
 /** Empieza un proyecto nuevo con este audio y lo analiza en segundo plano. */
 function startWithBuffer(buffer, name, origin, extra = {}) {
+  flushSave() // el proyecto anterior queda guardado tal cual
   stopPreview()
   stopSequencer()
   setRecorder({ take: null })
   stopAllVoices()
   clearHits()
   const sample = { ...createEditableSample({ name, buffer, source: origin.kind }), origin, ...extra }
-  const project = createProject({ mode: getProject().mode })
+  const project = createProject({ mode: getProject().mode, name: defaultProjectName(name) })
   project.samples = [sample]
   project.activeSampleId = sample.id
   replaceProject(project)
@@ -103,7 +106,8 @@ export async function importAudioFile(file) {
   try {
     await startAudio()
     const buffer = await decodeFile(file, getCtx())
-    startWithBuffer(buffer, file.name.replace(/\.[^.]+$/, ''), { kind: 'file', fileName: file.name, mime: file.type })
+    const sample = startWithBuffer(buffer, file.name.replace(/\.[^.]+$/, ''), { kind: 'file', fileName: file.name, mime: file.type })
+    saveSampleAudio(sample.id, file, file.name) // el archivo original, para poder reabrir el proyecto
   } catch (err) {
     showToast(err.message || friendlyAudioError(err), 'error')
   } finally {

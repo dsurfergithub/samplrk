@@ -27,7 +27,6 @@ export default function BeatResult() {
   const take = useRecorder(s => s.take)
   const phase = useSequencerPhase()
   const [loops, setLoops] = useState(1)
-  const [confirmNew, setConfirmNew] = useState(false)
   useEffect(() => { ensureKit() }, [])
   // si ya está sonando (vienes de grabar), escucharlo un momento cuenta como escucharlo
   useEffect(() => {
@@ -92,15 +91,8 @@ export default function BeatResult() {
 
           <div className="row beat-more">
             <button className="btn" onClick={() => goto('chop')}><Pencil size={16} /> Seguir editando</button>
-            {confirmNew ? (
-              <span className="row confirm-new">
-                <span>Este beat aún no se guarda al cerrar. ¿Empezar otro?</span>
-                <button className="btn btn-danger" onClick={() => goto('source')}>Sí, crear otro</button>
-                <button className="btn btn-ghost" onClick={() => setConfirmNew(false)}>No</button>
-              </span>
-            ) : (
-              <button className="btn btn-ghost" onClick={() => setConfirmNew(true)}><Plus size={16} /> Crear otro</button>
-            )}
+            <button className="btn btn-ghost" onClick={() => goto('source')}><Plus size={16} /> Crear otro</button>
+            <span className="fineprint beat-saved">Este beat queda guardado en «Mis proyectos».</span>
           </div>
         </>
       )}

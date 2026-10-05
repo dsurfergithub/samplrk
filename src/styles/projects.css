@@ -1,0 +1,38 @@
+/* projects.css — guardado y «Mis proyectos» */
+
+.save-ind {
+  display: inline-flex; align-items: center; gap: 5px; padding: 0 var(--s-2);
+  font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap;
+}
+.save-ind.is-saved svg { color: var(--active); }
+.save-ind.is-error, .save-ind.is-unavailable { color: var(--danger); }
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.home-continue { flex-direction: row; }
+.home-continue span { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+.home-continue small { font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; opacity: 0.8; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.projects { width: min(100%, 560px); min-width: 0; margin-top: var(--s-6); text-align: left; }
+.projects-title { font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--s-2); }
+.projects-title span { font-weight: 400; color: var(--muted); }
+.projects ul { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+.proj {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) var(--s-2) var(--s-1) var(--s-1); border-radius: var(--r-md);
+  background: var(--panel); border: 1px solid var(--line);
+}
+.proj-main { flex: 1; min-width: 0; min-height: var(--tap); padding: var(--s-2) var(--s-3); text-align: left; border-radius: var(--r-sm); display: flex; flex-direction: column; }
+.proj-main:hover { background: var(--panel-2); }
+.proj-main b { font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-main span { font-size: var(--fs-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-actions { display: flex; align-items: center; gap: 2px; flex: none; }
+.proj-actions .btn-icon { width: 40px; min-height: 40px; }
+.proj-confirm { font-size: var(--fs-xs); color: var(--danger); margin-right: 4px; }
+.proj-edit { flex: 1; display: flex; gap: var(--s-1); padding: var(--s-1); }
+.proj-edit input { flex: 1; min-width: 0; min-height: 40px; padding: 0 var(--s-3); border-radius: var(--r-sm); border: 1px solid var(--select); background: var(--bg); }
+.beat-saved { margin: 0 0 0 var(--s-2); align-self: center; }
+
+@media (max-width: 760px) {
+  .save-text { display: none; }
+}

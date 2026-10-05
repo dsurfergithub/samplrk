@@ -17,3 +17,4 @@ const store = createStore({
 export const useRecorder = store.use
 export const getRecorder = store.get
 export const setRecorder = store.set
+export const subscribeRecorder = store.subscribe

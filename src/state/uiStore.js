@@ -12,11 +12,14 @@ const store = createStore({
   cutDraft: null,          // { start, end, mark } mientras se elige el fragmento
   transformOpen: false,    // Aprendizaje: el usuario abrió las transformaciones antes de su misión
   moreOpen: false,         // Aprendizaje: idem para reverse y volumen
+  save: { status: 'idle' }, // autoguardado: idle | pending | saving | saved | error | unavailable
+  projects: [],            // «Mis proyectos» (resúmenes, sin abrir)
 })
 
 export const useUi = store.use
 export const getUi = store.get
 export const setUi = store.set
+export const subscribeUi = store.subscribe
 
 let toastTimer = null
 export function showToast(text, tone = 'info') {

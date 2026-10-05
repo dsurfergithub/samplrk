@@ -9,11 +9,14 @@ import './styles/pads.css'
 import './styles/record.css'
 import './styles/learning.css'
 import './styles/drums.css'
+import './styles/projects.css'
 import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
 import { useUi } from './state/uiStore'
 import { useEffect } from 'react'
 import { useHistory, useProject, undo, redo } from './state/projectStore'
 import { applyMix } from './actions/mixActions'
+import { bootPersistence } from './actions/projectActions'
+import SaveIndicator from './ui/SaveIndicator'
 import { useLearning } from './state/learningStore'
 import { setCoachEnabled } from './actions/learningActions'
 import { goto } from './actions/sampleActions'
@@ -41,6 +44,7 @@ export default function App() {
   useGlobalKeys()
   const mix = useProject(p => p.settings?.mix)
   useEffect(() => { applyMix() }, [mix])
+  useEffect(() => { bootPersistence() }, [])
 
   if (screen === 'home') return <div className="shell"><Home /><Toast /></div>
 
@@ -51,6 +55,7 @@ export default function App() {
         <button className="logo" onClick={() => goto('home')} aria-label="SAMPLRK, inicio">SAMPL<b>RK</b></button>
         <StepBar />
         <div className="topbar-actions">
+          <SaveIndicator />
           <TransportMini />
           <ProgressPanel />
           <button className="btn btn-ghost btn-icon" onClick={undo} disabled={!canUndo} aria-label="Deshacer" title="Deshacer (Ctrl/Cmd+Z)"><Undo2 size={18} /></button>
