@@ -4,7 +4,7 @@
  * pad y qué pad está sonando. Pad ↔ segmento funcionan en las dos direcciones.
  */
 import { useMemo } from 'react'
-import { Scissors, Grid2x2, Grid3x3, AudioWaveform } from 'lucide-react'
+import { Scissors, Grid2x2, Grid3x3, AudioWaveform, ArrowRight } from 'lucide-react'
 import Waveform from './Waveform'
 import PadGrid from './PadGrid'
 import ChopTools from './ChopTools'
@@ -12,7 +12,7 @@ import ChopInspector from './ChopInspector'
 import CoachLine from './CoachLine'
 import { useProject } from '../state/projectStore'
 import { useUi } from '../state/uiStore'
-import { getActiveBuffer, cutRegion } from '../actions/sampleActions'
+import { getActiveBuffer, cutRegion, goto } from '../actions/sampleActions'
 import { createChops, hitSlice, moveSliceEdge, splitAt } from '../actions/samplerActions'
 import { padLetter } from '../engines/sliceModel'
 import { liveState } from './hooks'
@@ -78,6 +78,10 @@ export default function ChopLab() {
           <div className="chop-play">
             <PadGrid pads={pads} slicesById={slicesById} buffer={buffer} selectedSliceId={selectedSliceId} />
             {selected && <ChopInspector slice={selected} letter={padLetter(pads.indexOf(selected.id))} />}
+          </div>
+          <div className="next-bar">
+            <p>¿Ya tienes una frase que te guste? Puedes seguir aquí experimentando todo lo que quieras.</p>
+            <button className="btn btn-primary" onClick={() => goto('record')}>Graba lo que tocas <ArrowRight size={16} /></button>
           </div>
         </>
       )}

@@ -48,6 +48,9 @@ export function flipKind(event, ctx = {}) {
   if (event.type === 'pad:hit') {
     return classifyPhrase(lastPhrase(ctx.hits ?? []), ctx.order ?? []) === 'flip' ? 'reorder' : null
   }
+  if (event.type === 'record:done') {
+    return classifyPhrase(event.sequence ?? [], ctx.order ?? []) === 'flip' ? 'reorder' : null
+  }
   if (event.type === 'pitch:changed' && event.semitones) return 'pitch'
   if (event.type === 'reverse:on') return 'reverse'
   return null
@@ -114,6 +117,30 @@ export function react(event, ctx = {}, seen = new Set()) {
       }
       return null
     }
+
+    case 'record:done':
+      return once('learned:pattern', {
+        kind: 'learned', term: 'pattern',
+        text: `Has grabado tu primer pattern (${event.count} golpes). SAMPLRK no ha grabado audio: ha anotado qué pad tocaste y cuándo. Por eso, si cambias el pitch de un chop, la toma suena distinta al instante.`,
+      })
+
+    case 'record:empty':
+      return {
+        id: 'hint:record-empty', kind: 'hint',
+        text: 'No he oído ningún golpe. Cuando termine la cuenta atrás (4, 3, 2, 1), toca los pads.',
+      }
+
+    case 'quantize:on':
+      return once('learned:quantize', {
+        kind: 'learned', term: 'quantize',
+        text: 'Esto se llama quantize: cada golpe se mueve al punto más cercano de la rejilla. Tu toma original sigue guardada: vuelve a «Original» para comparar.',
+      })
+
+    case 'quantize:off':
+      return seen.has('learned:quantize') ? once('hint:groove', {
+        kind: 'hint',
+        text: 'El groove no siempre significa tocar exactamente sobre la rejilla. Esas pequeñas imperfecciones también son tu manera de tocar.',
+      }) : null
 
     case 'pitch:changed': {
       const st = event.semitones

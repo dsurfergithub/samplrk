@@ -22,6 +22,7 @@ const PROGRESS_BY_EVENT = {
   'chops:created': ['chopComplete'],
   'pad:hit': ['playComplete'],
   'pitch:changed': ['pitchComplete'],
+  'record:done': ['recordComplete'],
 }
 
 export function notify(event) {

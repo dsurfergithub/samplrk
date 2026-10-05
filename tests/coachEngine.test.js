@@ -89,3 +89,23 @@ describe('flip (definición unificada)', () => {
     expect(react({ type: 'pitch:changed', semitones: 2 }).text).toContain('flip')
   })
 })
+
+describe('coach: grabación y quantize', () => {
+  it('explica qué es un pattern al terminar la toma', () => {
+    const m = react({ type: 'record:done', count: 6, sequence: [0, 1] })
+    expect(m.term).toBe('pattern')
+    expect(m.text).toContain('6 golpes')
+  })
+  it('una toma reordenada también cuenta como flip', () => {
+    expect(flipKind({ type: 'record:done', sequence: [2, 2, 0, 3] }, { order: ORDER })).toBe('reorder')
+    expect(flipKind({ type: 'record:done', sequence: [0, 1, 2, 3] }, { order: ORDER })).toBeNull()
+  })
+  it('quantize se explica después de usarlo, y el groove al volver a Original', () => {
+    expect(react({ type: 'quantize:off' })).toBeNull()
+    const seen = new Set()
+    const q = react({ type: 'quantize:on', grid: '1/8' }, {}, seen)
+    expect(q.term).toBe('quantize')
+    seen.add(q.id)
+    expect(react({ type: 'quantize:off' }, {}, seen).text).toContain('groove')
+  })
+})

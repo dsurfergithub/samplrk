@@ -3,12 +3,19 @@ import { subscribePreview, isPreviewing, previewPosition } from '../engines/audi
 import { activeVoices } from '../engines/samplerEngine'
 import { shouldIgnoreKey, padForCode } from '../engines/keyboardMap'
 import { hitPad } from '../actions/samplerActions'
+import { togglePlay } from '../actions/patternActions'
+import { subscribeSequencer, getSequencerSnapshot } from '../engines/sequencer'
 import { undo, redo } from '../state/projectStore'
 import { getUi } from '../state/uiStore'
 
 /** ¿Está sonando la preescucha? (cambia pocas veces: React está bien aquí). */
 export function usePreviewing() {
   return useSyncExternalStore(subscribePreview, isPreviewing)
+}
+
+/** Fase del secuenciador (idle/countin/recording/playing). Cambia pocas veces. */
+export function useSequencerPhase() {
+  return useSyncExternalStore(subscribeSequencer, () => getSequencerSnapshot().phase)
 }
 
 /** Para Waveform.getLive: playhead de la preescucha + chops sonando. */
@@ -32,7 +39,10 @@ export function useGlobalKeys() {
         return
       }
       if (mod && ev.code === 'KeyY' && !isTyping(ev)) { ev.preventDefault(); redo(); return }
-      if (ev.repeat || shouldIgnoreKey(ev) || getUi().screen !== 'chop') return
+      const screen = getUi().screen
+      if (screen !== 'chop' && screen !== 'record') return
+      if (ev.code === 'Space' && ev.target === document.body && screen === 'record') { ev.preventDefault(); togglePlay(); return }
+      if (ev.repeat || shouldIgnoreKey(ev)) return
       const i = padForCode(ev.code)
       if (i >= 0) { ev.preventDefault(); hitPad(i) }
     }

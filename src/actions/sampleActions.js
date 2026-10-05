@@ -5,6 +5,8 @@ import { createEditableSample, getRuntime } from '../engines/sampleEngine'
 import { analyzeSample } from '../engines/analysisEngine'
 import { getCtx, unlockAudio, playPreview, stopPreview } from '../engines/audioEngine'
 import { stopAllVoices } from '../engines/samplerEngine'
+import { stopSequencer } from '../engines/sequencer'
+import { setRecorder } from '../state/recorderStore'
 import { decodeFile, friendlyAudioError } from '../engines/audioImport'
 import { renderPracticeSample, PRACTICE_SAMPLES } from '../engines/demo/practiceSamples'
 import { createProject } from '../engines/projectModel'
@@ -16,6 +18,7 @@ const analyses = new Map() // sampleId → Promise<analysis>
 
 export function goto(screen) {
   stopPreview()
+  if (screen === 'home') stopSequencer()
   setUi({ screen })
 }
 
@@ -40,11 +43,13 @@ export function getActiveBuffer(project = getProject()) {
 }
 
 /** Empieza un proyecto nuevo con este audio y lo analiza en segundo plano. */
-function startWithBuffer(buffer, name, origin) {
+function startWithBuffer(buffer, name, origin, extra = {}) {
   stopPreview()
+  stopSequencer()
+  setRecorder({ take: null })
   stopAllVoices()
   clearHits()
-  const sample = { ...createEditableSample({ name, buffer, source: origin.kind }), origin }
+  const sample = { ...createEditableSample({ name, buffer, source: origin.kind }), origin, ...extra }
   const project = createProject()
   project.samples = [sample]
   project.activeSampleId = sample.id
@@ -74,7 +79,7 @@ export async function openPractice(id) {
   try {
     await startAudio()
     const buffer = await renderPracticeSample(id)
-    startWithBuffer(buffer, meta.title, { kind: 'demo', demoId: id })
+    startWithBuffer(buffer, meta.title, { kind: 'demo', demoId: id }, { tempoHint: meta.bpm })
   } catch {
     showToast('No he podido preparar este sample de práctica. Prueba con otro.', 'error')
   } finally {

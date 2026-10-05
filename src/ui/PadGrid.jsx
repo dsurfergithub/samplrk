@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import Pad from './Pad'
 import { subscribeSampler } from '../engines/samplerEngine'
+import { getCtx } from '../engines/audioEngine'
 import { padLetter, visiblePadCount } from '../engines/sliceModel'
 import { DEFAULT_KEYMAP, keyLabel } from '../engines/keyboardMap'
 import { hitPad } from '../actions/samplerActions'
@@ -22,15 +23,19 @@ export default function PadGrid({ pads, slicesById, buffer, selectedSliceId }) {
     if (typeof ev.padKey !== 'number') return
     const el = els.current[ev.padKey]
     if (!el) return
-    if (ev.type === 'start') {
-      const ms = Math.max(80, (ev.endAt - ev.startAt) * 1000)
+    if (ev.type !== 'start') return
+    const ms = Math.max(80, (ev.endAt - ev.startAt) * 1000)
+    // los golpes del pattern se programan por adelantado: el destello espera a que suenen
+    const delay = Math.max(0, (ev.startAt - getCtx().currentTime) * 1000)
+    const k = ev.padKey
+    clearTimeout(timers.current[k])
+    timers.current[k] = setTimeout(() => {
       el.style.setProperty('--hit-ms', `${ms}ms`)
       el.classList.remove('is-hit')
       void el.offsetWidth // reinicia la animación al re-disparar
       el.classList.add('is-hit')
-      clearTimeout(timers.current[ev.padKey])
-      timers.current[ev.padKey] = setTimeout(() => el.classList.remove('is-hit'), ms + 60)
-    }
+      timers.current[k] = setTimeout(() => el.classList.remove('is-hit'), ms + 60)
+    }, delay)
   }), [])
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])

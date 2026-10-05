@@ -6,6 +6,7 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './styles/screens.css'
 import './styles/pads.css'
+import './styles/record.css'
 import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
 import { useUi } from './state/uiStore'
 import { useHistory, undo, redo } from './state/projectStore'
@@ -17,11 +18,13 @@ import Home from './ui/Home'
 import SourcePicker from './ui/SourcePicker'
 import CutLab from './ui/CutLab'
 import ChopLab from './ui/ChopLab'
+import RecordLab from './ui/RecordLab'
+import TransportMini from './ui/TransportMini'
 import StepBar from './ui/StepBar'
 import Toast from './ui/Toast'
 import AudioGate from './ui/AudioGate'
 
-const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab }
+const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab, record: RecordLab }
 
 export default function App() {
   const screen = useUi(s => s.screen)
@@ -39,6 +42,7 @@ export default function App() {
         <button className="logo" onClick={() => goto('home')} aria-label="SAMPLRK, inicio">SAMPL<b>RK</b></button>
         <StepBar />
         <div className="topbar-actions">
+          <TransportMini />
           <button className="btn btn-ghost btn-icon" onClick={undo} disabled={!canUndo} aria-label="Deshacer" title="Deshacer (Ctrl/Cmd+Z)"><Undo2 size={18} /></button>
           <button className="btn btn-ghost btn-icon" onClick={redo} disabled={!canRedo} aria-label="Rehacer" title="Rehacer (Ctrl/Cmd+Shift+Z)"><Redo2 size={18} /></button>
           <button className={`btn btn-ghost btn-icon${coachOn ? '' : ' is-off'}`} onClick={() => setCoachEnabled(!coachOn)}

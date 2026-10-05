@@ -161,7 +161,11 @@ button { cursor: pointer; background: none; border: 0; }
 
 @media (max-width: 760px) {
   .steps { display: none; }
-  .steps-compact { display: block; }
+  .steps-compact { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar { gap: var(--s-2); padding: var(--s-2) var(--s-3); }
+  .logo { font-size: 18px; }
+  .topbar-actions { gap: 0; flex: none; }
+  .topbar-actions .btn-icon { width: 40px; }
   .main { padding: var(--s-4) var(--s-4) var(--s-8); }
 }
 

@@ -9,6 +9,7 @@ import { commit, getProject } from '../state/projectStore'
 import { getUi, setUi, showToast } from '../state/uiStore'
 import { getActiveSample, getActiveBuffer, cutRegion, whenAnalyzed } from './sampleActions'
 import { notify, recordHit } from './learningActions'
+import { captureHit } from './patternActions'
 
 // ---------------------------------------------------------------- helpers
 
@@ -162,8 +163,9 @@ export function hitPad(index, velocity = 1) {
   const slice = sliceById(id, p)
   const buffer = getActiveBuffer(p)
   if (!slice || !buffer) return
-  triggerSlice(buffer, slice, { padKey: index, velocity })
-  // después del sonido: selección, registro y coach
+  const voice = triggerSlice(buffer, slice, { padKey: index, velocity })
+  // después del sonido: grabación (si la hay), selección y coach
+  if (voice) captureHit(index, voice.startAt, voice.endAt - voice.startAt)
   select(id)
   recordHit(index)
   notify({ type: 'pad:hit', pad: index })
