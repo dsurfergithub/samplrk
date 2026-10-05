@@ -45,6 +45,7 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Análisis** | `analysisEngine.js` → `analysisWorker.js` → `dsp.js` | BPM, fase, tonalidad, golpes (transitorios), silencios, energía. Corre en segundo plano al abrir un audio; alimenta «Detectar golpes» y las pistas de corte. |
 | **Onda** | `waveformPeaks.js` | Mono + tabla min/max por bloques de 128 muestras, cacheada por buffer. Dibujar una columna agrega bloques, no muestras. |
 | **Importación** | `audioImport.js` | Formatos garantizados (WAV, MP3) y «si tu navegador puede» (M4A, OGG, FLAC…), límites (60 MB / 10 min), errores traducidos. |
+| **Old School** | `oldSchool.js` | Puro. Límites por proyecto (memoria, bits, kHz, mono, 8 pads, sin ayudas), presets, memoria usada y si un corte cabe, 33/45 rpm (`SPEED_45`, pitch que lo compensa) y `degradeChannels` (sample-and-hold + cuantización). |
 | **MIDI** | `midiMap.js` + `midiEngine.js` | `midiMap` (puro): mensajes, nombres de nota, velocity → volumen, mapas por defecto (36–51 y teclas blancas desde C3 para chops; General MIDI para batería) y MIDI learn. `midiEngine`: acceso Web MIDI y conexión/desconexión. Opcional: sin MIDI todo funciona con teclado y pantalla. |
 | **Persistencia** | `persistenceEngine.js` + `persistModel.js` | IndexedDB (`projects`, `audio`, `meta`): proyecto como JSON versionado, audio importado como archivo original, último proyecto y pantalla, aprendizaje y preferencias. `persistModel` (puro) decide qué se guarda y cómo se resume. |
 | **Proyecto** | `projectModel.js` | Schema versionado (`schemaVersion: 1`), serialización y migraciones (incluida la de v0.1). |
@@ -66,6 +67,11 @@ Pattern  { id, name, kind: 'chops'|'drums', bars, bpm, quantize: 'off'|'1/4'|'1/
 
 En `drums`, `padId` es la pieza del kit ('kick', 'snare', 'hat', 'open'). Las dos pistas duran lo mismo.
 `DrumKit { id, name, pads: [{ id, gain, pitch }] }` y `settings.mix { chops, drums, master }` completan el proyecto.
+
+`settings.oldSchool { enabled, memorySec, bits, sampleRate, mono, maxPads, noHelpers, preset }` y `sample.edits.speed`
+(1 = 33 rpm, 1,35 = 45 rpm) completan el modelo. **Audio que suena** = `getPlayableBuffer(sampleId)`: el original o, en
+Old School, un derivado degradado y cacheado; cada voz multiplica su rate por la velocidad de su sample (`playableSlice`).
+Resamplear crea un proyecto nuevo cuyo sample es el beat renderizado (guardado como WAV).
 
 Un evento de pattern guarda el **pad** y el **beat** de tu toma original: nunca audio. El quantize se aplica al
 reproducir, así que «Original» siempre está disponible. Al reproducir, cada evento busca qué chop hay en su pad,
@@ -94,7 +100,8 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | Find + Cut + Loop | `CutLab` (escuchar → «Aquí hay algo» → INICIO/FIN → Repetir → «Este es mi sample») |
 | Chop + Play | `ChopLab`, `ChopTools`, `PadGrid`/`Pad`, `ChopInspector` |
 | Record / Drums | `RecordLab` (pista `chops` o `drums`), `TempoControl`, `PatternLane`, `DrumPads`, `MixPanel` (+ `TransportMini` en la barra superior) |
-| Beat | `BeatResult` (resumen, play, Exportar WAV) |
+| Beat | `BeatResult` (resumen, play, Exportar WAV, Resamplear) |
+| Old School | `OldSchool` (presets, ajustes, historia) y `MemoryMeter` en Cut/Chop/Record/Drums/Beat |
 | Comunes | `Waveform` (+ `WaveOverview`), `MissionHead`, `StepBar`, `ProgressPanel`, `CoachLine`, `AudioGate`, `Toast` |
 
 ### Modo Aprendizaje vs Modo Libre

@@ -6,7 +6,7 @@ SAMPLRK enseña sampling desde cero, haciéndolo: escuchas una grabación, encue
 
 No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: la app ayuda **después** de que actúes, nunca antes.
 
-## Estado: SAMPLRK 2 · Fases 1–6 (sampler, grabación, aprendizaje, batería, guardado y MIDI)
+## Estado: SAMPLRK 2 · Fases 1–7 (sampler, grabación, aprendizaje, batería, guardado, MIDI y Old School)
 
 - ✅ Discos de práctica: piano real (fragmentos con licencia libre de josefpres/Freesound, ver `src/assets/practice/CREDITS.md`) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz)
 - ✅ Importar WAV/MP3 (y otros formatos si tu navegador los abre), con errores comprensibles
@@ -20,11 +20,13 @@ No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: 
 - ✅ «Tu primer beat»: escúchalo, mira lo que has usado y expórtalo en WAV; mezcla sencilla (sample, batería, general)
 - ✅ Guardado automático en el navegador (IndexedDB): al recargar vuelves donde estabas; «Mis proyectos» para continuar, renombrar o borrar
 - ✅ MIDI (Chrome): controladores de pads y teclados, velocity (también en la grabación), MIDI learn y mapa General MIDI para la batería
+- ✅ Old School: memoria limitada (MEMORY 7,4 / 10,0 s), 12 bits, pocos kHz, mono, 8 pads, sin ayudas; truco de 33 / 45 rpm
+- ✅ Resampling: tu beat se convierte en un sample nuevo para volver a trocearlo
 - ✅ Deshacer / rehacer (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
-- ✅ Modo Aprendizaje: 11 misiones cortas (escuchar, loop, cortar, chops, tocar, flip, grabar, pitch, reverse, batería, beat), cada una en su pantalla, con «Seguir» / «Quedarme aquí y experimentar» y «Saltar»
+- ✅ Modo Aprendizaje: 12 misiones cortas (escuchar, loop, cortar, chops, tocar, flip, grabar, pitch, reverse, batería, beat, resample), cada una en su pantalla, con «Seguir» / «Quedarme aquí y experimentar» y «Saltar»
 - ✅ Sampling Basics: lista de lo practicado (sin notas de calidad) y Modo Libre sin misiones
 - ✅ Coach determinista y offline: habla después de la acción y no repite lo que explica la misión
-- 🔜 Fase 7 Old School · 8 avanzado
+- 🔜 Fase 8 avanzado (escenas, timeline, biblioteca de loops)
 
 La interfaz anterior (v0.1: loops, escenas, timeline) sigue disponible en `#/legacy`.
 

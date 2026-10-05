@@ -505,3 +505,50 @@ Limitaciones conocidas:
 - No se ha podido probar en un Safari o iPhone reales desde este entorno (solo hay Chromium): conviene una prueba manual.
 - Sin modo *gate* (mantener pulsado) ni *aftertouch*; los pads son one-shot.
 - Un solo mapa para todos los controladores conectados.
+
+---
+
+## 15. Fase 7 — Old School y resampling (cerrada)
+
+**Objetivo:** enseñar creatividad mediante limitaciones, y que el usuario entienda por qué el sonido de los samplers
+antiguos nació de sus límites.
+
+Implementado:
+- `oldSchool.js` (puro): límites configurables por proyecto — memoria total (5/10/20 s), bits (8/12/16), frecuencia
+  de muestreo (11/26/40/44,1 kHz), mono, 8 pads y «sin ayudas automáticas» — con tres presets
+  (Memoria mínima · Algo más de memoria · Lo-fi extremo). Nunca destructivo: al desactivarlo vuelve el audio original.
+- **Memoria**: «MEMORY 7,4 / 10,0 s» en Cut, Chop, Record, Drums y Beat. En Cut se calcula con la selección en curso;
+  si no cabe, la selección se pinta en rojo, se explica cuánto ocupa y cuánto queda y no se puede confirmar.
+- **33 / 45 rpm**: en Cut, «Disco: 33 rpm / 45 rpm». A 45 el audio suena un 35 % más rápido y agudo y ocupa un 35 % menos.
+  En el inspector, «Sampleado a 45 rpm» y **Devolver su tono (−5)**. Física real: la reducción de kHz se aplica sobre el
+  audio acelerado, así que al bajar el pitch la frecuencia efectiva queda más baja (más crujiente).
+- **12 bits / pocos kHz / mono**: sample-and-hold sin filtro (el aliasing es parte del sonido) y cuantización; buffer derivado
+  y cacheado, usado por pads, secuenciador, preescucha, onda y export (lo que oyes es lo que exportas).
+- **8 pads y sin ayudas**: «Detectar golpes» y las pistas de corte se desactivan; dividir más allá de 8 lo explica.
+- **Resampling** (en «Tu beat»): el beat (una vuelta, tal y como suena) se convierte en un **proyecto nuevo** con ese audio
+  como sample, cortado entero y listo para trocear; hereda tempo, modo, mezcla y Old School; se guarda como WAV. El original
+  queda intacto en «Mis proyectos». **Misión 12: «Resamplea tu beat»**.
+- Pantalla **Old School** (desde Find, desde la lista de progreso o desde el medidor): presets, ajustes y tres tarjetas
+  cortas: el truco de 33/45 rpm, qué suena distinto con 12 bits y pocos kHz, y por qué se resampleaba.
+- Coach (después de la acción): al activar Old School, al samplear a 45, al quedarse sin memoria y al resamplear.
+- Arquitectura: cada chop suena con el audio y la velocidad de SU sample (`getPlayableBuffer`, `playableSlice`), lo que
+  también prepara proyectos con varios samples.
+
+Corregido durante la fase (lo detectaron las pruebas en navegador):
+- Activar Old School antes de elegir disco se perdía al crear el proyecto: ahora el proyecto nuevo lo hereda.
+- En Old School, un arrastre empezado al escuchar se cortaba al pasar a «cortar» (la onda se volvía a montar al aparecer el
+  medidor). Ahora ocupa el mismo hueco en las dos fases.
+
+Verificado (`npm test`: 138 tests; build; navegador a 1280 px y 375 px):
+- 16 s no caben en 10; 12 s tampoco a 33 rpm; a 45 rpm ocupan 8,9 s y sí caben.
+- Audio comprobado en la reproducción: mono, 100 % de muestras en la rejilla de 12 bits y muestras repetidas en la proporción
+  esperada (57 % a 45 rpm con 26 kHz; 41 % a 33 rpm). Pitch −5 a 45 rpm → velocidad 1,011 (casi el tono original).
+- 8 pads, «Detectar golpes» desactivado, dividir bloqueado con explicación.
+- Resample → proyecto nuevo con 4,0 s de memoria; tras recargar, sus pads suenan (audio desde el WAV guardado).
+- Desactivar Old School → vuelve el audio original estéreo.
+- Recorrido completo de **12 misiones**; regresión de Fases 1–6 (incluido MIDI y Safari simulado) en verde.
+
+Limitaciones conocidas:
+- La degradación es una simulación educativa, no la emulación de una máquina concreta (sin filtros de entrada/salida
+  ni la cuantización no lineal de algunos modelos).
+- Activar Old School en un proyecto con más de 8 chops oculta los pads 9–16 (no los borra).
