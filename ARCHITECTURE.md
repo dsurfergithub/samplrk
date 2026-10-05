@@ -33,13 +33,13 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Slices** | `sliceModel.js` | Puro. Crear (iguales / en golpes), dividir, unir, borrar, mover bordes enlazados; banco de 16 pads que referencia slices por id; orden original para el coach. |
 | **Pitch** | `pitch.js` | Puro. Semitonos ↔ rate ↔ duración. |
 | **Teclado** | `keyboardMap.js` | Puro. `KeyboardEvent.code` → pad (`1 2 3 4 / Q W E R / A S D F / Z X C V`). |
-| **Coach** | `coachEngine.js` | Puro y determinista. Clasifica frases (orden original / flip / stutter) y reacciona a eventos (`cut:confirmed`, `loop:on`, `chops:created`, `pad:hit`, `pitch:changed`, `reverse:on`). Mensajes `learned` (vocabulario, una vez) y `hint` (ignorables). |
+| **Coach** | `coachEngine.js` | Puro y determinista. Define *flip* de forma única (`flipKind`: reordenar/repetir chops, pitch o reverse = transformar el sample respecto al original). Clasifica frases (orden original / flip / stutter) y reacciona a eventos (`cut:confirmed`, `loop:on`, `chops:created`, `pad:hit`, `pitch:changed`, `reverse:on`). Mensajes `learned` (vocabulario, una vez) y `hint` (ignorables). |
 | **Cortes** | `cutHints.js` | Puro. «Hay un golpe cerca del inicio» y «el loop no empalma», en lenguaje humano. Solo sugiere. |
 | **Análisis** | `analysisEngine.js` → `analysisWorker.js` → `dsp.js` | BPM, fase, tonalidad, golpes (transitorios), silencios, energía. Corre en segundo plano al abrir un audio; alimenta «Detectar golpes» y las pistas de corte. |
 | **Onda** | `waveformPeaks.js` | Mono + tabla min/max por bloques de 128 muestras, cacheada por buffer. Dibujar una columna agrega bloques, no muestras. |
 | **Importación** | `audioImport.js` | Formatos garantizados (WAV, MP3) y «si tu navegador puede» (M4A, OGG, FLAC…), límites (60 MB / 10 min), errores traducidos. |
 | **Proyecto** | `projectModel.js` | Schema versionado (`schemaVersion: 1`), serialización y migraciones (incluida la de v0.1). |
-| **Práctica** | `demo/synth.js`, `demo/practiceSamples.js` | Grabaciones originales sintetizadas en el navegador (Soul, Funk, Jazz, Voz): libres de derechos y sin peso de descarga. |
+| **Práctica** | `demo/practiceSamples.js`, `demo/synth.js`, `assets/practice/` | Catálogo de discos: dos fragmentos reales de piano con licencia libre (WAV de 16 s, se descargan solo al elegirlos) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz). |
 | Export / Loops / Escenas / Timeline | `exportEngine.js`, `loopEngine.js`, `projectEngine.js`, `timelineEngine.js`, `library.js`, `aiAssistant.js` | Sin cambios. Usados por `#/legacy`; volverán en el modo avanzado. |
 
 ## Modelo de datos (schemaVersion 1)

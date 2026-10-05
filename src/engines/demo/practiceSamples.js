@@ -1,17 +1,34 @@
 /**
- * demo/practiceSamples.js — "discos" de práctica originales de SAMPLRK.
+ * demo/practiceSamples.js — "discos" de práctica de SAMPLRK.
  *
- * Cada entrada es una mini-grabación compuesta para aprender a samplear:
- * tiene un motivo melódico, acordes, algo rítmico, huecos de silencio y
- * golpes claros que facilitan el chop. Se sintetiza en el navegador
- * (OfflineAudioContext) la primera vez que se pide y queda en caché.
- * Libre de derechos: es código propio, no hay audio de terceros.
+ * Dos tipos de disco:
+ *  · grabaciones reales con licencia libre (`src`): fragmentos cortos
+ *    incluidos en src/assets/practice (créditos en CREDITS.md de esa carpeta)
+ *  · mini-grabaciones compuestas para aprender a samplear (`synth`):
+ *    motivo melódico, acordes, algo rítmico, huecos y golpes claros.
+ *    Se sintetizan en el navegador (OfflineAudioContext): código propio.
+ * Todo se prepara la primera vez que se pide y queda en caché.
  */
 import * as S from './synth'
+import { getCtx } from '../audioEngine'
+import pianoOctaveEfect from '../../assets/practice/piano-octave-efect-120.wav?url'
+import pianoOctaveDown from '../../assets/practice/piano-octave-down-120.wav?url'
 
 const SR = 44100
 
 export const PRACTICE_SAMPLES = [
+  {
+    id: 'piano-octave-down', crate: 'Piano', title: 'Octava abajo', bpm: 120, bars: 8,
+    blurb: 'Piano real en un bucle de ocho compases. Notas claras y separadas: perfecto para tu primer chop.',
+    color: '#ffd43b', src: pianoOctaveDown,
+    credit: 'Piano Loops 213 · josefpres (Freesound)',
+  },
+  {
+    id: 'piano-octave-efect', crate: 'Piano', title: 'Octavas con efecto', bpm: 120, bars: 8,
+    blurb: 'Piano real que va cambiando poco a poco. Escucha bien: cada compás esconde algo distinto.',
+    color: '#9775fa', src: pianoOctaveEfect,
+    credit: 'Piano Loops 051 · josefpres (Freesound)',
+  },
   {
     id: 'soul-keys', crate: 'Soul', title: 'Domingo en Rhodes', bpm: 86, bars: 4,
     blurb: 'Piano eléctrico cálido, bajo y escobillas. Al final, una pequeña melodía sola.',
@@ -152,6 +169,13 @@ const cache = new Map()
 export async function renderPracticeSample(id) {
   if (cache.has(id)) return cache.get(id)
   const meta = PRACTICE_SAMPLES.find(x => x.id === id)
+  if (meta?.src) {
+    const res = await fetch(meta.src)
+    if (!res.ok) throw new Error('No se pudo descargar el sample de práctica')
+    const buffer = await getCtx().decodeAudioData(await res.arrayBuffer())
+    cache.set(id, buffer)
+    return buffer
+  }
   const arrange = ARRANGEMENTS[id]
   if (!meta || !arrange) throw new Error('Sample de práctica desconocido')
   const beat = 60 / meta.bpm

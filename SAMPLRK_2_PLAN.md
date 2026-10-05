@@ -302,7 +302,14 @@ Verificado con `npm test` (63 tests), `npm run build` y recorridos automáticos 
 - Las fuentes se cargan de Google Fonts; sin red se usa la fuente del sistema.
 - Probado en Chromium (escritorio y emulación móvil). Falta probar en Safari/iOS real.
 
-### Decisiones abiertas para afinar
-1. **Samples de práctica**: ahora son sintetizados con código propio. ¿Quieres añadir grabaciones reales con licencia libre?
-2. **Paso FLIP**: en el recorrido significa «transformar» (pitch, reverse…); el coach usa «flip» para reordenar chops. ¿Unificamos?
-3. **Teclado**: `1 2 3 4 / Q W E R` (16 pads: `+ A S D F / Z X C V`). ¿Te vale o prefieres otra disposición?
+### Decisiones tomadas tras la Fase 1
+1. **Samples de práctica**: se añaden dos grabaciones reales de piano (josefpres, Freesound) aportadas como audio libre.
+   Se incluyen fragmentos de 16 s (8 compases a 120 BPM) en WAV, con el nivel ajustado a −1 dBFS
+   (créditos en `src/assets/practice/CREDITS.md`). Los discos sintetizados se mantienen.
+   La licencia no se ha podido comprobar desde el entorno de desarrollo: revisar la página de cada sonido.
+2. **Flip unificado**: *flip* = transformar el sample para que deje de funcionar como en la grabación original.
+   Cuenta reordenar o repetir chops, cambiar el pitch o hacer reverse. El paso FLIP del recorrido se marca
+   con cualquiera de ellos (también con el coach apagado) y lleva al Chop Lab, donde pitch y reverse aparecen
+   agrupados bajo «Flip». El coach explica el término con la primera reordenación y recuerda que pitch y
+   reverse también son flips.
+3. **Teclado**: se mantiene `1 2 3 4 / Q W E R` (16 pads: `+ A S D F / Z X C V`).

@@ -71,3 +71,21 @@ describe('cutHints.startHint', () => {
     expect(startHint(3, [1.0])).toBeNull()
   })
 })
+
+import { flipKind } from '../src/engines/coachEngine.js'
+
+describe('flip (definición unificada)', () => {
+  it('reordenar, cambiar pitch o hacer reverse son flips', () => {
+    expect(flipKind({ type: 'pad:hit' }, { hits: hits([2, 2, 0, 3]), order: ORDER })).toBe('reorder')
+    expect(flipKind({ type: 'pitch:changed', semitones: -3 })).toBe('pitch')
+    expect(flipKind({ type: 'reverse:on' })).toBe('reverse')
+  })
+  it('tocar en el orden original o volver el pitch a 0 no lo es', () => {
+    expect(flipKind({ type: 'pad:hit' }, { hits: hits([0, 1, 2, 3]), order: ORDER })).toBeNull()
+    expect(flipKind({ type: 'pitch:changed', semitones: 0 })).toBeNull()
+  })
+  it('pitch y reverse lo explican como flip', () => {
+    expect(react({ type: 'reverse:on' }).text).toContain('flip')
+    expect(react({ type: 'pitch:changed', semitones: 2 }).text).toContain('flip')
+  })
+})

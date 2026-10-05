@@ -14,7 +14,7 @@ const STEPS = [
   { id: 'chop', label: 'Chop', screen: 'chop', done: 'chopComplete', needs: 'sample' },
   { id: 'play', label: 'Play', screen: 'chop', done: 'playComplete', needs: 'sample' },
   { id: 'record', label: 'Record' },
-  { id: 'flip', label: 'Flip', done: 'flipComplete' },
+  { id: 'flip', label: 'Flip', screen: 'chop', done: 'flipComplete', needs: 'sample' },
   { id: 'drums', label: 'Drums' },
 ]
 

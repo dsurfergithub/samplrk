@@ -2,7 +2,7 @@
  * learningActions.js — la app informa al coach de lo que acaba de pasar.
  * El coach responde (o no) con una frase; nunca toca el proyecto.
  */
-import { react } from '../engines/coachEngine'
+import { react, flipKind } from '../engines/coachEngine'
 import { originalOrder } from '../engines/sliceModel'
 import { getLearning, setLearning, markProgress } from '../state/learningStore'
 import { getProject } from '../state/projectStore'
@@ -25,15 +25,15 @@ const PROGRESS_BY_EVENT = {
 }
 
 export function notify(event) {
+  const p = getProject()
+  const ctx = { hits, order: originalOrder(p.padBanks[0].pads, p.slices) }
+  // el progreso no depende de que el coach esté encendido
   for (const k of PROGRESS_BY_EVENT[event.type] ?? []) markProgress(k)
+  if (flipKind(event, ctx)) markProgress('flipComplete')
   const L = getLearning()
   if (!L.coachEnabled) return
-  const p = getProject()
-  const bank = p.padBanks[0]
-  const ctx = { hits, order: originalOrder(bank.pads, p.slices) }
   const msg = react(event, ctx, new Set(L.seen))
   if (!msg) return
-  if (msg.term === 'flip') markProgress('flipComplete')
   setLearning(s => ({ message: msg, seen: [...s.seen, msg.id] }))
 }
 

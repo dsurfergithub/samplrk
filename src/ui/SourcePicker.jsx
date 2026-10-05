@@ -27,7 +27,7 @@ export default function SourcePicker() {
       <header className="screen-head">
         <div className="eyebrow">Find <span>· Encuentra</span></div>
         <h2 className="screen-title">Elige un disco para escuchar.</h2>
-        <p className="screen-sub">Son grabaciones originales de SAMPLRK, hechas para practicar. Escucha alguna y quédate con la que te diga algo.</p>
+        <p className="screen-sub">Grabaciones de práctica, libres para samplear. Escucha alguna y quédate con la que te diga algo.</p>
       </header>
 
       <div className="crates">
@@ -36,6 +36,7 @@ export default function SourcePicker() {
             <div className="crate-label"><Disc3 size={14} /> {s.crate}</div>
             <h3 className="crate-title">{s.title}</h3>
             <p className="crate-blurb">{s.blurb}</p>
+            {s.credit && <p className="crate-credit">{s.credit}</p>}
             <div className="row">
               <button className="btn btn-icon" onClick={() => audition(s.id)} aria-label={playingId === s.id ? `Parar ${s.title}` : `Escuchar ${s.title}`}>
                 {playingId === s.id ? <Square size={16} /> : <Play size={16} />}

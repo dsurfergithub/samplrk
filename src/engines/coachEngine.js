@@ -38,6 +38,23 @@ export function classifyPhrase(phrase, order) {
   return inOrder ? 'original' : 'flip'
 }
 
+/**
+ * FLIP (definición única en SAMPLRK): transformar el sample para que deje de
+ * funcionar como en la grabación original. Cuenta como flip reordenar chops
+ * (o repetirlos), cambiarles el pitch o darles la vuelta (reverse).
+ * Devuelve el tipo de flip que produce el evento, o null.
+ */
+export function flipKind(event, ctx = {}) {
+  if (event.type === 'pad:hit') {
+    return classifyPhrase(lastPhrase(ctx.hits ?? []), ctx.order ?? []) === 'flip' ? 'reorder' : null
+  }
+  if (event.type === 'pitch:changed' && event.semitones) return 'pitch'
+  if (event.type === 'reverse:on') return 'reverse'
+  return null
+}
+
+const ALSO_FLIP = 'Transformar así el sample también es hacer un flip.'
+
 /** Mensajes por evento. `ctx` aporta lo necesario para personalizar el texto. */
 export function react(event, ctx = {}, seen = new Set()) {
   const once = (id, msg) => (seen.has(id) ? null : { id, ...msg })
@@ -78,7 +95,7 @@ export function react(event, ctx = {}, seen = new Set()) {
       if (kind === 'flip') {
         return once('learned:flip', {
           kind: 'learned', term: 'flip',
-          text: 'Eso ya es un flip: has reorganizado partes del sample para crear una frase que no existía así en la grabación.',
+          text: 'Eso ya es un flip: has reorganizado partes del sample para crear una frase que no existía así en la grabación. Cambiar el pitch o darle la vuelta a un chop también son flips.',
         })
       }
       if (kind === 'original' && !seen.has('learned:flip')) {
@@ -105,14 +122,14 @@ export function react(event, ctx = {}, seen = new Set()) {
       const longer = st < 0 ? 'más largo y más grave' : 'más corto y más agudo'
       return once('learned:pitch', {
         kind: 'learned', term: 'pitch',
-        text: `Has ${dir} el pitch ${Math.abs(st)} semitonos. ¿Notas que también cambia la duración? Suena ${longer}: así funcionaban los samplers clásicos.`,
+        text: `Has ${dir} el pitch ${Math.abs(st)} semitonos. ¿Notas que también cambia la duración? Suena ${longer}: así funcionaban los samplers clásicos. ${ALSO_FLIP}`,
       })
     }
 
     case 'reverse:on':
       return once('learned:reverse', {
         kind: 'learned', term: 'reverse',
-        text: 'Esto se llama reverse: el chop suena de atrás hacia delante. Funciona muy bien en platos y voces.',
+        text: `Esto se llama reverse: el chop suena de atrás hacia delante. Funciona muy bien en platos y voces. ${ALSO_FLIP}`,
       })
 
     default:

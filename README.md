@@ -8,12 +8,12 @@ No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: 
 
 ## Estado: SAMPLRK 2 · Fase 1 (sampler básico)
 
-- ✅ Discos de práctica originales (Soul, Funk, Jazz, Voz) sintetizados en el navegador: libres de derechos
+- ✅ Discos de práctica: piano real (fragmentos con licencia libre de josefpres/Freesound, ver `src/assets/practice/CREDITS.md`) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz)
 - ✅ Importar WAV/MP3 (y otros formatos si tu navegador los abre), con errores comprensibles
 - ✅ Escuchar → «Aquí hay algo» → ajustar INICIO/FIN → Repetir (loop) → «Este es mi sample»
 - ✅ Chop Lab: 4 / 8 cortes, detectar golpes, «yo corto»; dividir, unir, borrar, mover cortes, reordenar pads
 - ✅ 8 o 16 pads con ratón, touch y teclado (`1 2 3 4 / Q W E R`)
-- ✅ Pitch old school (cambia también la duración) y reverse por chop
+- ✅ Flip: reordenar chops, pitch old school (cambia también la duración) y reverse por chop
 - ✅ Deshacer / rehacer (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
 - ✅ Coach determinista y offline: «prueba a romper el orden», «eso ya es un flip»…
 - 🔜 Fase 2 grabar patterns · 3 misiones completas · 4 batería · 5 guardado local · 6 MIDI · 7 Old School · 8 avanzado

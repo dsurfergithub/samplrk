@@ -27,6 +27,7 @@ export default function ChopInspector({ slice, letter }) {
         <button className="btn btn-icon" onClick={() => hitSlice(slice.id)} aria-label="Escuchar chop"><Play size={16} /></button>
       </div>
 
+      <div className="insp-section">Flip <span>· transforma el chop</span></div>
       <div className="insp-block">
         <div className="insp-label">Pitch <span>· velocidad</span></div>
         <div className="pitch-row">
