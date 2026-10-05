@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Play, Download, Trash2, Save, AlertTriangle, Link2 } from 'lucide-react'
-import { useStore } from '../state/store'
+import { useStore } from '../store'
 import { useTransport } from './hooks'
-import { toggleLoopPad, previewLoop, deleteLoop, exportLoopWav, saveScene } from '../app/actions'
+import { toggleLoopPad, previewLoop, deleteLoop, exportLoopWav, saveScene } from '../actions'
 
 export default function LoopsView() {
   const loops = useStore(s => s.loops)

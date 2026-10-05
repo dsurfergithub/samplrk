@@ -3,12 +3,12 @@ import {
   Play, Square, Scissors, Wand2, Repeat, AudioWaveform, RotateCcw,
   FlipHorizontal2, Gauge, ZoomIn, ZoomOut, Maximize2, Download,
 } from 'lucide-react'
-import { useStore, updateSample, updateSampleEdits, setState } from '../state/store'
-import { editedMono, editedTransients, defaultEdits } from '../engines/sampleEngine'
+import { useStore, updateSample, updateSampleEdits, setState } from '../store'
+import { editedMono, editedTransients, defaultEdits } from '../../engines/sampleEngine'
 import {
   analyze, generateLoops, createLoopFromSelection, autoSlice,
   previewSampleSelection, stopPreview, exportSampleWav,
-} from '../app/actions'
+} from '../actions'
 
 export default function SampleEditor() {
   const sample = useStore(s => s.samples.find(x => x.id === s.activeSampleId) || s.samples[0])

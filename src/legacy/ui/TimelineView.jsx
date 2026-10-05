@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Play, Square, Plus, Trash2, ArrowLeft, ArrowRight, Download } from 'lucide-react'
-import { useStore } from '../state/store'
-import { addSection, removeSection, moveSection, exportSongWav } from '../app/actions'
-import { playTimeline, stopTimeline, SECTION_PRESETS, totalBars, songDuration } from '../engines/timelineEngine'
-import { stopTransport } from '../engines/audioEngine'
+import { useStore } from '../store'
+import { addSection, removeSection, moveSection, exportSongWav } from '../actions'
+import { playTimeline, stopTimeline, SECTION_PRESETS, totalBars, songDuration } from '../../engines/timelineEngine'
+import { stopTransport } from '../../engines/audioEngine'
 
 export default function TimelineView() {
   const timeline = useStore(s => s.timeline)

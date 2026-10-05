@@ -1,0 +1,72 @@
+/* pads.css — pads físicos: goma oscura, se hunden al tocarlos y se iluminan
+   con el color de su chop mientras suenan. */
+
+.pad-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3);
+  user-select: none; -webkit-user-select: none;
+}
+.pad-grid.is-16 { gap: var(--s-2); }
+
+.pad {
+  position: relative; aspect-ratio: 1 / 0.92; min-height: 76px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: var(--s-2) var(--s-3) var(--s-3);
+  border-radius: 14px; text-align: left; overflow: hidden;
+  background: linear-gradient(180deg, #24272c 0%, #1c1e22 100%);
+  border: 1px solid #30343b;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -4px 0 rgba(0,0,0,.35), 0 2px 0 rgba(0,0,0,.4);
+  touch-action: manipulation;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast), border-color var(--t-fast);
+}
+/* franja de color del chop: identidad visual sample → chop → secuencia */
+.pad::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  background: var(--chop, transparent);
+}
+.pad:hover { border-color: #3b4048; }
+.pad:active { transform: translateY(2px); }
+.pad.is-selected { border-color: var(--select); box-shadow: inset 0 0 0 1px var(--select), inset 0 -4px 0 rgba(0,0,0,.35); }
+
+/* destello mientras suena: decae durante la duración real del chop */
+.pad::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(120% 90% at 50% 100%, var(--chop) 0%, transparent 75%);
+}
+.pad.is-hit { transform: translateY(2px); border-color: var(--chop); }
+.pad.is-hit::after { animation: padGlow var(--hit-ms, 300ms) linear forwards; }
+@keyframes padGlow { 0% { opacity: 0.55; } 100% { opacity: 0; } }
+
+.pad-letter {
+  position: absolute; left: var(--s-3); top: var(--s-2);
+  font-size: clamp(18px, 3.4vw, 26px); font-weight: 800; font-stretch: 112%; line-height: 1.1;
+}
+.pad-key {
+  position: absolute; right: var(--s-2); top: var(--s-2);
+  min-width: 22px; height: 22px; padding: 0 5px; border-radius: 6px;
+  display: grid; place-items: center;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  border: 1px solid var(--line);
+}
+.pad-wave { width: 100%; height: 30%; min-height: 18px; display: block; margin-bottom: 6px; opacity: 0.9; }
+.pad-name { font-size: var(--fs-xs); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 36px; position: relative; z-index: 1; }
+.pad-badges { position: absolute; right: var(--s-2); bottom: var(--s-2); display: flex; gap: 3px; z-index: 1; }
+.pad-badge {
+  display: inline-flex; align-items: center; height: 18px; padding: 0 5px; border-radius: 5px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  background: var(--chop); color: #111;
+}
+
+.pad.is-empty {
+  background: transparent; border: 1.5px dashed var(--line); box-shadow: none; cursor: default;
+}
+.pad.is-empty::before { display: none; }
+.pad.is-empty .pad-letter, .pad.is-empty .pad-name { color: var(--muted); opacity: 0.6; }
+
+@media (max-width: 640px) {
+  .pad-grid { gap: var(--s-2); }
+  .pad { padding: var(--s-2); border-radius: 12px; aspect-ratio: 1 / 1; }
+  .pad-letter { left: var(--s-2); }
+  .pad-key { right: 6px; top: 6px; }
+  .pad-name { display: none; }
+  .pad-badges { right: 6px; bottom: 6px; }
+}

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Play, Square } from 'lucide-react'
-import { useStore } from '../state/store'
+import { useStore } from '../store'
 import { useTransport } from './hooks'
-import { startTransport, stopTransport, currentBar } from '../engines/audioEngine'
-import { setProjectBpm, stopEverything } from '../app/actions'
+import { startTransport, stopTransport, currentBar } from '../../engines/audioEngine'
+import { setProjectBpm, stopEverything } from '../actions'
 
 export default function Transport() {
   const t = useTransport()

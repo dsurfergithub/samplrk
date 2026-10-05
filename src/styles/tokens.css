@@ -1,0 +1,60 @@
+/*
+ * tokens.css — design system de SAMPLRK 2.
+ *
+ * Identidad: instrumento hardware moderno. Fondo oscuro, contraste alto,
+ * pads físicos y pocos colores con significado:
+ *   naranja → audio / sample      azul  → selección
+ *   verde   → activo / sonando    rojo  → grabación
+ * Los colores de chop (sliceModel.CHOP_COLORS) identifican cada trozo
+ * en la onda, en el pad y (Fase 2) en el pattern.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  /* superficie */
+  --bg: #0b0c0e;
+  --panel: #131417;
+  --panel-2: #1a1c20;
+  --raise: #22252a;
+  --line: #2b2f35;
+  --line-strong: #3b4048;
+
+  /* texto */
+  --text: #f2f0ea;
+  --text-2: #c2c4c9;
+  --muted: #8a8f98;
+
+  /* color funcional */
+  --sample: #ff9a3c;
+  --sample-soft: rgba(255, 154, 60, 0.14);
+  --select: #4ea8ff;
+  --select-soft: rgba(78, 168, 255, 0.16);
+  --active: #4fe08a;
+  --active-soft: rgba(79, 224, 138, 0.14);
+  --rec: #ff4b4b;
+  --danger: #ff6b6b;
+
+  /* espacio (escala de 4) */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+  /* radios */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
+
+  /* tipografía */
+  --font: 'Archivo', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 20px;
+  --fs-xl: clamp(24px, 4vw, 32px);
+  --fs-hero: clamp(48px, 13vw, 112px);
+
+  /* interacción */
+  --tap: 48px;               /* objetivo táctil mínimo */
+  --focus: 0 0 0 3px var(--bg), 0 0 0 5px var(--select);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --t-fast: 90ms;
+  --t-med: 180ms;
+
+  --shell-max: 1180px;
+  color-scheme: dark;
+}

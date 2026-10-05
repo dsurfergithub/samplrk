@@ -1,65 +1,55 @@
-import { useState } from 'react'
-import { Sparkles } from 'lucide-react'
-import { useStore } from './state/store'
-import { gotoView } from './app/actions'
-import Transport from './ui/Transport'
-import ImportView from './ui/ImportView'
-import SampleEditor from './ui/SampleEditor'
-import LoopsView from './ui/LoopsView'
-import ScenesView from './ui/ScenesView'
-import TimelineView from './ui/TimelineView'
-import AssistantPanel from './ui/AssistantPanel'
+/**
+ * App — shell de SAMPLRK 2. Sin pestañas de DAW: una pantalla cada vez,
+ * un recorrido sugerido y libertad para moverse.
+ */
+import './styles/tokens.css'
+import './styles/base.css'
+import './styles/screens.css'
+import './styles/pads.css'
+import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
+import { useUi } from './state/uiStore'
+import { useHistory, undo, redo } from './state/projectStore'
+import { useLearning } from './state/learningStore'
+import { setCoachEnabled } from './actions/learningActions'
+import { goto } from './actions/sampleActions'
+import { useGlobalKeys } from './ui/hooks'
+import Home from './ui/Home'
+import SourcePicker from './ui/SourcePicker'
+import CutLab from './ui/CutLab'
+import ChopLab from './ui/ChopLab'
+import StepBar from './ui/StepBar'
+import Toast from './ui/Toast'
+import AudioGate from './ui/AudioGate'
 
-const TABS = [
-  ['import', 'Importar'],
-  ['editor', 'Editor'],
-  ['loops', 'Loops'],
-  ['scenes', 'Escenas'],
-  ['timeline', 'Timeline'],
-]
+const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab }
 
 export default function App() {
-  const view = useStore(s => s.view)
-  const busy = useStore(s => s.busy)
-  const toast = useStore(s => s.toast)
-  const [assistOpen, setAssistOpen] = useState(false)
+  const screen = useUi(s => s.screen)
+  const canUndo = useHistory(h => h.past.length > 0)
+  const canRedo = useHistory(h => h.future.length > 0)
+  const coachOn = useLearning(s => s.coachEnabled)
+  useGlobalKeys()
 
+  if (screen === 'home') return <div className="shell"><Home /><Toast /></div>
+
+  const Screen = SCREENS[screen] ?? SourcePicker
   return (
-    <div className="app">
+    <div className="shell">
       <header className="topbar">
-        <div className="logo">SAMPL<span>RK</span></div>
-        <nav className="tabs">
-          {TABS.map(([id, label]) => (
-            <button key={id} className={`tab${view === id ? ' active' : ''}`} onClick={() => gotoView(id)}>
-              {label}
-            </button>
-          ))}
-        </nav>
-        <Transport />
+        <button className="logo" onClick={() => goto('home')} aria-label="SAMPLRK, inicio">SAMPL<b>RK</b></button>
+        <StepBar />
+        <div className="topbar-actions">
+          <button className="btn btn-ghost btn-icon" onClick={undo} disabled={!canUndo} aria-label="Deshacer" title="Deshacer (Ctrl/Cmd+Z)"><Undo2 size={18} /></button>
+          <button className="btn btn-ghost btn-icon" onClick={redo} disabled={!canRedo} aria-label="Rehacer" title="Rehacer (Ctrl/Cmd+Shift+Z)"><Redo2 size={18} /></button>
+          <button className={`btn btn-ghost btn-icon${coachOn ? '' : ' is-off'}`} onClick={() => setCoachEnabled(!coachOn)}
+            aria-pressed={coachOn} aria-label={coachOn ? 'Silenciar coach' : 'Activar coach'} title={coachOn ? 'Coach activado' : 'Coach desactivado'}>
+            {coachOn ? <Lightbulb size={18} /> : <LightbulbOff size={18} />}
+          </button>
+        </div>
       </header>
-
-      <div className="body">
-        <main className="main">
-          {view === 'import' && <ImportView />}
-          {view === 'editor' && <SampleEditor />}
-          {view === 'loops' && <LoopsView />}
-          {view === 'scenes' && <ScenesView />}
-          {view === 'timeline' && <TimelineView />}
-        </main>
-        <AssistantPanel open={assistOpen} onClose={() => setAssistOpen(false)} />
-      </div>
-
-      <button className="assistant-toggle" onClick={() => setAssistOpen(o => !o)} aria-label="Asistente">
-        <Sparkles size={22} />
-      </button>
-
-      {busy && (
-        <>
-          <div className="busy"><i /></div>
-          <div className="busy-label">{busy}</div>
-        </>
-      )}
-      {toast && <div className="toast">{toast}</div>}
+      <AudioGate />
+      <main className="main"><Screen /></main>
+      <Toast />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { Play, RefreshCw, Trash2, Download } from 'lucide-react'
-import { useStore } from '../state/store'
-import { launchScene, updateSceneFromLive, deleteScene, exportSceneWav } from '../app/actions'
+import { useStore } from '../store'
+import { launchScene, updateSceneFromLive, deleteScene, exportSceneWav } from '../actions'
 
 export default function ScenesView() {
   const scenes = useStore(s => s.scenes)

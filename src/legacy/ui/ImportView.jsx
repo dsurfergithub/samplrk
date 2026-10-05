@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import { Upload, Mic, FlaskConical, Play, Trash2, PencilRuler, Download } from 'lucide-react'
-import { useStore, setState } from '../state/store'
+import { useStore, setState } from '../store'
 import {
   importFiles, toggleRecording, createDemoSample, deleteSample,
   previewSampleSelection, exportSampleWav,
-} from '../app/actions'
+} from '../actions'
 
 export default function ImportView() {
   const samples = useStore(s => s.samples)

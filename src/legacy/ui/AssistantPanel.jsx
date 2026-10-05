@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Sparkles, X } from 'lucide-react'
-import { useStore } from '../state/store'
-import { getSuggestions } from '../engines/aiAssistant'
-import { analyze, trimSilence, generateLoops, autoSlice, gotoView } from '../app/actions'
+import { useStore } from '../store'
+import { getSuggestions } from '../../engines/aiAssistant'
+import { analyze, trimSilence, generateLoops, autoSlice, gotoView } from '../actions'
 
 const ACTIONS = { analyze, trimSilence, generateLoops, autoSlice, gotoView }
 

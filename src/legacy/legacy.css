@@ -47,6 +47,8 @@ input, select { font-family: inherit; }
   color: var(--text);
 }
 .logo span { color: var(--accent); }
+.logo { text-decoration: none; }
+.logo small { font-size: 10px; letter-spacing: 1px; color: var(--muted); font-weight: 500; }
 
 .body { display: flex; flex: 1; min-height: 0; }
 

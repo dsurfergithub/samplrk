@@ -2,7 +2,7 @@
  * actions.js — orquestación de la app.
  * Une store + motores. Las vistas y el asistente solo llaman a estas funciones.
  */
-import { getState, setState, updateSample, updateSampleEdits, showToast } from '../state/store'
+import { getState, setState, updateSample, updateSampleEdits, showToast } from './store'
 import {
   createEditableSample, getRuntime, releaseBuffer, renderEditedBuffer,
   editedTransients, editedDuration, pitchRate, uid,
