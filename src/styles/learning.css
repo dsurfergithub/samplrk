@@ -1,0 +1,82 @@
+/* learning.css — misiones, «misión cumplida», progreso y revelado progresivo */
+
+.link-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 2px;
+  color: var(--text-2); font-size: var(--fs-sm); text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+.link-btn:hover { color: var(--text); text-decoration-color: currentColor; }
+
+/* ------------------------------------------------------------ misión */
+
+.mission { position: relative; }
+.mission-eyebrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--select); }
+.mission.is-done .mission-eyebrow { color: var(--active); }
+.mission-dots { display: inline-flex; gap: 4px; margin-left: var(--s-2); }
+.mission-dots i { width: 14px; height: 4px; border-radius: 2px; background: var(--line-strong); }
+.mission-dots i.is-done { background: var(--active); }
+.mission-dots i.is-now { background: var(--select); }
+.mission .screen-title { animation: rise var(--t-med) var(--ease); }
+.mission-examples { margin-top: var(--s-3); }
+.chip-seq { font-size: var(--fs-sm); padding: 8px 12px; letter-spacing: 0.2em; color: var(--text); border-color: var(--line-strong); }
+.mission-skip { margin-top: var(--s-2); color: var(--muted); font-size: var(--fs-xs); }
+.mission-actions { margin-top: var(--s-4); }
+.mission.is-done {
+  padding: var(--s-4); border-radius: var(--r-lg);
+  background: var(--active-soft); border: 1px solid color-mix(in srgb, var(--active) 40%, transparent);
+}
+.mission.is-done .screen-title { font-size: clamp(20px, 3vw, 26px); }
+.mission-fact {
+  display: flex; gap: var(--s-2); align-items: flex-start; margin-top: var(--s-3);
+  color: var(--text-2); font-size: var(--fs-sm); max-width: 70ch;
+  animation: rise var(--t-med) var(--ease);
+}
+.mission-fact svg { flex: none; margin-top: 2px; color: var(--sample); }
+.mission-pointer {
+  display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: var(--s-3); min-height: 40px; padding: 0 var(--s-3);
+  border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--panel);
+  font-size: var(--fs-sm); color: var(--text-2); text-align: left;
+}
+.mission-pointer span { color: var(--select); font-family: var(--mono); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; }
+.mission-pointer:hover { border-color: var(--select); color: var(--text); }
+
+/* ------------------------------------------------------------ revelado progresivo (inspector) */
+
+.insp-reveal { justify-content: flex-start; width: 100%; }
+.insp-reveal span { color: var(--muted); font-weight: 400; margin-left: 2px; }
+
+/* ------------------------------------------------------------ progreso */
+
+.progress { position: relative; }
+.progress-toggle { padding: 0 var(--s-2); gap: 4px; }
+.progress-count { font-family: var(--mono); font-size: var(--fs-xs); color: var(--text-2); }
+.progress-panel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 30;
+  width: min(340px, calc(100vw - 24px));
+  padding: var(--s-4); border-radius: var(--r-lg);
+  background: var(--panel); border: 1px solid var(--line-strong);
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+  animation: rise var(--t-med) var(--ease);
+}
+.progress-panel h3 { font-size: var(--fs-md); font-weight: 800; font-stretch: 108%; }
+.progress-panel ul { list-style: none; margin: var(--s-3) 0; display: grid; gap: 2px; }
+.progress-panel li { display: flex; align-items: center; gap: var(--s-2); min-height: 32px; font-size: var(--fs-sm); color: var(--text-2); }
+.progress-panel li svg { flex: none; color: var(--muted); }
+.progress-panel li.is-done { color: var(--text); }
+.progress-panel li.is-done svg { color: var(--active); }
+.progress-panel li.is-upcoming { opacity: 0.55; }
+.progress-panel li small { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.progress-mode { display: flex; align-items: center; gap: var(--s-2); padding-top: var(--s-3); border-top: 1px solid var(--line); }
+.progress-note { margin: var(--s-2) 0; color: var(--muted); font-size: var(--fs-xs); }
+
+@media (max-width: 760px) {
+  .mission-dots { display: none; }
+  .progress-panel { position: fixed; left: 12px; right: 12px; top: 104px; width: auto; max-height: calc(100dvh - 120px); overflow: auto; }
+  .insp-reveal span { display: none; }
+  .mission-actions .btn { flex: 1 1 auto; }
+}
+@media (max-width: 420px) {
+  .progress-count { display: none; }
+}

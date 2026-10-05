@@ -9,6 +9,7 @@ import PadGrid from './PadGrid'
 import PatternLane from './PatternLane'
 import TempoControl from './TempoControl'
 import CoachLine from './CoachLine'
+import MissionHead from './MissionHead'
 import { useProject } from '../state/projectStore'
 import { useUi } from '../state/uiStore'
 import { useRecorder } from '../state/recorderStore'
@@ -60,14 +61,10 @@ export default function RecordLab() {
 
   return (
     <section className="record">
-      <header className="screen-head">
-        <div className="eyebrow">Record <span>· Graba</span></div>
-        <h2 className="screen-title">{busy ? (phase === 'countin' ? 'Prepárate…' : 'Toca ahora.') : 'Graba lo que tocas.'}</h2>
-        <p className="screen-sub">
-          {busy ? 'Todo lo que toques se anota tal cual, sin corregir.'
-            : 'Pulsa Grabar, espera la cuenta atrás y toca tus pads. Después se repetirá en bucle.'}
-        </p>
-      </header>
+      <MissionHead screen="record" lock={busy} eyebrow={['Record', 'Graba']}
+        title={busy ? (phase === 'countin' ? 'Prepárate…' : 'Toca ahora.') : 'Graba lo que tocas.'}
+        sub={busy ? 'Todo lo que toques se anota tal cual, sin corregir.'
+          : 'Pulsa Grabar, espera la cuenta atrás y toca tus pads. Después se repetirá en bucle.'} />
       <CoachLine />
 
       <TempoControl disabled={busy} />

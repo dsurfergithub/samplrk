@@ -7,6 +7,7 @@ import './styles/base.css'
 import './styles/screens.css'
 import './styles/pads.css'
 import './styles/record.css'
+import './styles/learning.css'
 import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
 import { useUi } from './state/uiStore'
 import { useHistory, undo, redo } from './state/projectStore'
@@ -20,6 +21,7 @@ import CutLab from './ui/CutLab'
 import ChopLab from './ui/ChopLab'
 import RecordLab from './ui/RecordLab'
 import TransportMini from './ui/TransportMini'
+import ProgressPanel from './ui/ProgressPanel'
 import StepBar from './ui/StepBar'
 import Toast from './ui/Toast'
 import AudioGate from './ui/AudioGate'
@@ -43,6 +45,7 @@ export default function App() {
         <StepBar />
         <div className="topbar-actions">
           <TransportMini />
+          <ProgressPanel />
           <button className="btn btn-ghost btn-icon" onClick={undo} disabled={!canUndo} aria-label="Deshacer" title="Deshacer (Ctrl/Cmd+Z)"><Undo2 size={18} /></button>
           <button className="btn btn-ghost btn-icon" onClick={redo} disabled={!canRedo} aria-label="Rehacer" title="Rehacer (Ctrl/Cmd+Shift+Z)"><Redo2 size={18} /></button>
           <button className={`btn btn-ghost btn-icon${coachOn ? '' : ' is-off'}`} onClick={() => setCoachEnabled(!coachOn)}

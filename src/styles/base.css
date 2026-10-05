@@ -160,9 +160,15 @@ button { cursor: pointer; background: none; border: 0; }
 @keyframes blink { 50% { opacity: 0.2; } }
 
 @media (max-width: 760px) {
-  .steps { display: none; }
-  .steps-compact { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .topbar { gap: var(--s-2); padding: var(--s-2) var(--s-3); }
+  /* en móvil, el recorrido baja a una segunda fila que se desliza en horizontal */
+  .topbar { flex-wrap: wrap; gap: 0 var(--s-2); padding: var(--s-1) var(--s-3) 0; }
+  .steps {
+    order: 10; width: calc(100% + 2 * var(--s-3)); margin: 0 calc(-1 * var(--s-3));
+    padding: 0 var(--s-3) var(--s-1); overflow-x: auto; scrollbar-width: none;
+  }
+  .steps::-webkit-scrollbar { display: none; }
+  .step { flex: none; min-height: 40px; }
+  .steps-compact { display: none; }
   .logo { font-size: 18px; }
   .topbar-actions { gap: 0; flex: none; }
   .topbar-actions .btn-icon { width: 40px; }

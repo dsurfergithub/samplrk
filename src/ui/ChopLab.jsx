@@ -10,6 +10,9 @@ import PadGrid from './PadGrid'
 import ChopTools from './ChopTools'
 import ChopInspector from './ChopInspector'
 import CoachLine from './CoachLine'
+import MissionHead from './MissionHead'
+import { useLearning } from '../state/learningStore'
+import { currentMission } from '../engines/missions'
 import { useProject } from '../state/projectStore'
 import { useUi } from '../state/uiStore'
 import { getActiveBuffer, cutRegion, goto } from '../actions/sampleActions'
@@ -23,6 +26,11 @@ export default function ChopLab() {
   const pads = useProject(p => p.padBanks[0].pads)
   const selectedSliceId = useUi(s => s.selectedSliceId)
   const tool = useUi(s => s.chopTool)
+  const mode = useProject(p => p.mode)
+  const missionHere = useLearning(s => {
+    const m = currentMission(s.progress, s.skipped)
+    return mode === 'learning' && !s.exploring && !!m && m.screens.includes('chop')
+  })
   const buffer = useMemo(() => getActiveBuffer(), [sample?.id])
 
   const slices = useMemo(() => allSlices.filter(s => s.sampleId === sample?.id), [allSlices, sample?.id])
@@ -41,15 +49,12 @@ export default function ChopLab() {
 
   return (
     <section className="chop">
-      <header className="screen-head">
-        <div className="eyebrow">{hasChops ? 'Play' : 'Chop'} <span>· {hasChops ? 'Toca' : 'Divide'}</span></div>
-        <h2 className="screen-title">{hasChops ? 'Ahora tócalos.' : 'Vamos a trocear tu sample.'}</h2>
-        <p className="screen-sub">
-          {hasChops
-            ? 'Toca los pads con el dedo, el ratón o el teclado. Primero en orden… y después como quieras.'
-            : 'Cada trozo irá a un pad. Puedo sugerirte cortes, o puedes hacerlos tú.'}
-        </p>
-      </header>
+      <MissionHead screen="chop"
+        eyebrow={hasChops ? ['Play', 'Toca'] : ['Chop', 'Divide']}
+        title={hasChops ? 'Ahora tócalos.' : 'Vamos a trocear tu sample.'}
+        sub={hasChops
+          ? 'Toca los pads con el dedo, el ratón o el teclado. Primero en orden… y después como quieras.'
+          : 'Cada trozo irá a un pad. Puedo sugerirte cortes, o puedes hacerlos tú.'} />
       <CoachLine />
 
       <Waveform
@@ -79,10 +84,10 @@ export default function ChopLab() {
             <PadGrid pads={pads} slicesById={slicesById} buffer={buffer} selectedSliceId={selectedSliceId} />
             {selected && <ChopInspector slice={selected} letter={padLetter(pads.indexOf(selected.id))} />}
           </div>
-          <div className="next-bar">
+          {!missionHere && <div className="next-bar">
             <p>¿Ya tienes una frase que te guste? Puedes seguir aquí experimentando todo lo que quieras.</p>
             <button className="btn btn-primary" onClick={() => goto('record')}>Graba lo que tocas <ArrowRight size={16} /></button>
-          </div>
+          </div>}
         </>
       )}
     </section>

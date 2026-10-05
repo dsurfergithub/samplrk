@@ -4,16 +4,14 @@
  */
 import { ArrowRight } from 'lucide-react'
 import { startAudio, goto } from '../actions/sampleActions'
-import { setCoachEnabled } from '../actions/learningActions'
-import { commit } from '../state/projectStore'
+import { setMode } from '../actions/learningActions'
 
 // la frase del momento clave: A C C B suena a "algo mío"
 const DEMO = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 async function begin(mode) {
   await startAudio()
-  setCoachEnabled(mode === 'learning')
-  commit(p => ({ ...p, mode }), { undoable: false })
+  setMode(mode)
   goto('source')
 }
 

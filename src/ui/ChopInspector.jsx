@@ -1,8 +1,33 @@
 /**
  * ChopInspector — el chop seleccionado: nombre, pitch, reverse, volumen y pad.
  * El pitch enseña la regla old school: más grave = más largo, más agudo = más corto.
+ *
+ * En Modo Aprendizaje las transformaciones aparecen poco a poco (primero
+ * pitch, luego reverse y volumen) según avanzan las misiones. Nunca se
+ * bloquean: un botón las abre en cualquier momento.
  */
-import { Minus, Plus, FlipHorizontal2, Play, RotateCcw, ArrowLeft, ArrowRight } from 'lucide-react'
+
+const PITCH_AT = MISSIONS.findIndex(m => m.id === 'pitch')
+const REVERSE_AT = MISSIONS.findIndex(m => m.id === 'reverse')
+
+function useDisclosure() {
+  const mode = useProject(p => p.mode)
+  const progress = useLearning(s => s.progress)
+  const skipped = useLearning(s => s.skipped)
+  const transformOpen = useUi(s => s.transformOpen)
+  const moreOpen = useUi(s => s.moreOpen)
+  if (mode !== 'learning') return { flip: true, more: true }
+  const cur = currentMissionIndex(progress, skipped)
+  return {
+    flip: transformOpen || progress.pitchComplete || cur >= PITCH_AT,
+    more: moreOpen || progress.reverseComplete || cur >= REVERSE_AT,
+  }
+}
+import { Minus, Plus, FlipHorizontal2, Play, RotateCcw, ArrowLeft, ArrowRight, Wand2, ChevronDown } from 'lucide-react'
+import { useProject } from '../state/projectStore'
+import { useLearning } from '../state/learningStore'
+import { useUi, setUi } from '../state/uiStore'
+import { MISSIONS, currentMissionIndex } from '../engines/missions'
 import { PITCH_MIN, PITCH_MAX, pitchedDuration, formatSemitones } from '../engines/pitch'
 import { sliceDuration } from '../engines/sliceModel'
 import {
@@ -15,6 +40,7 @@ export default function ChopInspector({ slice, letter }) {
   const orig = sliceDuration(slice)
   const now = pitchedDuration(orig, slice.pitch)
   const max = Math.max(orig, now)
+  const show = useDisclosure()
 
   return (
     <aside className="inspector" style={{ '--chop': slice.color }} aria-label={`Chop ${letter}`}>
@@ -27,6 +53,12 @@ export default function ChopInspector({ slice, letter }) {
         <button className="btn btn-icon" onClick={() => hitSlice(slice.id)} aria-label="Escuchar chop"><Play size={16} /></button>
       </div>
 
+      {!show.flip ? (
+        <button className="btn insp-reveal" onClick={() => setUi({ transformOpen: true })}>
+          <Wand2 size={16} /> Transformar este chop <span>pitch, reverse…</span>
+        </button>
+      ) : (
+        <>
       <div className="insp-section">Flip <span>· transforma el chop</span></div>
       <div className="insp-block">
         <div className="insp-label">Pitch <span>· velocidad</span></div>
@@ -45,6 +77,7 @@ export default function ChopInspector({ slice, letter }) {
         </div>
       </div>
 
+          {show.more ? (
       <div className="insp-block insp-split">
         <button className={`btn${slice.reversed ? ' is-on' : ''}`} onClick={() => { toggleReverse(slice.id); setTimeout(() => hitSlice(slice.id), 0) }} aria-pressed={slice.reversed}>
           <FlipHorizontal2 size={16} /> Reverse
@@ -55,6 +88,13 @@ export default function ChopInspector({ slice, letter }) {
             onChange={e => setSliceGain(slice.id, Number(e.target.value))} aria-label="Volumen del chop" />
         </label>
       </div>
+          ) : (
+            <button className="btn btn-ghost insp-reveal" onClick={() => setUi({ moreOpen: true })}>
+              <ChevronDown size={16} /> Más formas de transformar <span>reverse y volumen</span>
+            </button>
+          )}
+        </>
+      )}
 
       <div className="insp-block row">
         <span className="insp-label">Pad</span>

@@ -8,6 +8,7 @@ import { PRACTICE_SAMPLES } from '../engines/demo/practiceSamples'
 import { ACCEPT_ATTR } from '../engines/audioImport'
 import { openPractice, auditionPractice, importAudioFile, stopPreview } from '../actions/sampleActions'
 import { usePreviewing } from './hooks'
+import MissionHead from './MissionHead'
 
 export default function SourcePicker() {
   const fileRef = useRef(null)
@@ -24,11 +25,8 @@ export default function SourcePicker() {
 
   return (
     <section>
-      <header className="screen-head">
-        <div className="eyebrow">Find <span>· Encuentra</span></div>
-        <h2 className="screen-title">Elige un disco para escuchar.</h2>
-        <p className="screen-sub">Grabaciones de práctica, libres para samplear. Escucha alguna y quédate con la que te diga algo.</p>
-      </header>
+      <MissionHead screen="source" eyebrow={['Find', 'Encuentra']} title="Elige un disco para escuchar."
+        sub="Grabaciones de práctica, libres para samplear. Escucha alguna y quédate con la que te diga algo." />
 
       <div className="crates">
         {PRACTICE_SAMPLES.map(s => (

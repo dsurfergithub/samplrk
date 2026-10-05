@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Play, Square, Repeat, Sparkles, ChevronLeft, ChevronRight, RotateCcw, Check } from 'lucide-react'
 import Waveform from './Waveform'
 import CoachLine from './CoachLine'
+import MissionHead from './MissionHead'
 import { useProject } from '../state/projectStore'
 import { getActiveBuffer, previewAll, previewRange, stopPreview, confirmCut } from '../actions/sampleActions'
 import { notify } from '../actions/learningActions'
@@ -35,6 +36,10 @@ function Cutter({ sample, buffer }) {
   const [looping, setLooping] = useState(false)
   const [showHit, setShowHit] = useState(false)
   const previewing = usePreviewing()
+
+  // la primera vez que hay un fragmento elegido, has "encontrado" algo
+  const hasSel = sel !== null
+  useEffect(() => { if (hasSel) notify({ type: 'find:marked' }) }, [hasSel])
 
   // si la preescucha en bucle se para desde fuera, el botón se apaga
   useEffect(() => { if (!previewing) setLooping(false) }, [previewing])
@@ -81,11 +86,8 @@ function Cutter({ sample, buffer }) {
   if (!sel) {
     return (
       <section className="cut">
-        <header className="screen-head">
-          <div className="eyebrow">Find <span>· Encuentra</span></div>
-          <h2 className="screen-title">Escucha la grabación.</h2>
-          <p className="screen-sub">Cuando oigas algo que te guste —un acorde, un golpe, una frase— pulsa <b>Aquí hay algo</b>.</p>
-        </header>
+        <MissionHead screen="cut" eyebrow={['Find', 'Encuentra']} title="Escucha la grabación."
+          sub="Cuando oigas algo que te guste —un acorde, un golpe, una frase— pulsa «Aquí hay algo»." />
         <CoachLine />
         <Waveform buffer={buffer} dim selectable onSelectionChange={setSel} getLive={liveState}
           className="wave-listen" label={`Grabación «${sample.name}». Arrastra para elegir un fragmento.`} />
@@ -98,7 +100,10 @@ function Cutter({ sample, buffer }) {
             <Sparkles size={20} /> Aquí hay algo
           </button>
         </div>
-        <p className="fineprint center">También puedes arrastrar sobre la onda para elegir un trozo directamente.</p>
+        <p className="fineprint center">
+          También puedes arrastrar sobre la onda para elegir un trozo directamente,
+          o <button className="link-btn" onClick={() => confirmCut(0, dur)}>usar la grabación entera</button>.
+        </p>
       </section>
     )
   }
@@ -107,11 +112,8 @@ function Cutter({ sample, buffer }) {
   const len = sel.end - sel.start
   return (
     <section className="cut">
-      <header className="screen-head">
-        <div className="eyebrow">Cut <span>· Corta</span></div>
-        <h2 className="screen-title">Ajusta el inicio y el final.</h2>
-        <p className="screen-sub">Arrastra los tiradores azules. Escucha, mueve, vuelve a escuchar: tu oído decide.</p>
-      </header>
+      <MissionHead screen="cut" eyebrow={['Cut', 'Corta']} title="Ajusta el inicio y el final."
+        sub="Arrastra los tiradores azules. Escucha, mueve, vuelve a escuchar: tu oído decide." />
       <CoachLine />
 
       <Waveform buffer={buffer} fit={fit} selection={sel} selectable onSelectionChange={setSel}
