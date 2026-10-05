@@ -19,7 +19,7 @@ describe('misiones', () => {
 
   it('al terminar todas no hay misión actual', () => {
     const all = P(['findComplete', 'loopComplete', 'cutComplete', 'chopComplete', 'playComplete',
-      'reorderComplete', 'recordComplete', 'pitchComplete', 'reverseComplete', 'drumsComplete', 'beatComplete'])
+      'reorderComplete', 'recordComplete', 'pitchComplete', 'reverseComplete', 'drumsComplete', 'beatComplete', 'resampleComplete'])
     expect(currentMission(all)).toBeNull()
   })
 
@@ -48,12 +48,12 @@ describe('misiones', () => {
     expect(resolve(reorder.examples, { letters: ['A', 'B'] })).toEqual([])
   })
 
-  it('la lista de progreso solo mide conceptos, e incluye lo que viene', () => {
+  it('la lista de progreso solo mide conceptos', () => {
     const list = checklist(P(['findComplete']), ['loop'])
     expect(list[0]).toMatchObject({ id: 'find', done: true })
     expect(list[1]).toMatchObject({ id: 'loop', done: false, skipped: true })
     expect(list.find(x => x.id === 'drums').upcoming).toBeFalsy()
-    expect(list.find(x => x.id === 'resample').upcoming).toBe(true)
+    expect(list.find(x => x.id === 'resample')).toMatchObject({ label: 'Resamplear', done: false })
     for (const x of list) expect(Object.keys(x)).not.toContain('score')
   })
 })

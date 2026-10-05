@@ -13,7 +13,7 @@ import { triggerSlice } from '../engines/samplerEngine'
 import { stopPreview } from '../engines/audioEngine'
 import { commit, getProject } from '../state/projectStore'
 import { getRecorder, setRecorder } from '../state/recorderStore'
-import { getActiveSample, getActiveBuffer } from './sampleActions'
+import { getActiveSample, getPlayableBuffer, playableSlice } from './sampleActions'
 import { playDrum } from './drumActions'
 import { notify } from './learningActions'
 
@@ -86,8 +86,8 @@ function playEvent(event, when) {
   const p = getProject()
   const sliceId = p.padBanks[0].pads[event.padId]
   const slice = sliceId && p.slices.find(s => s.id === sliceId)
-  const buffer = getActiveBuffer(p)
-  if (slice && buffer) triggerSlice(buffer, slice, { padKey: event.padId, when, velocity: event.velocity })
+  const buffer = slice && getPlayableBuffer(slice.sampleId, p)
+  if (slice && buffer) triggerSlice(buffer, playableSlice(slice, p), { padKey: event.padId, when, velocity: event.velocity })
 }
 
 export function hasBeat() { return beatLength() !== null }

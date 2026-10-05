@@ -24,7 +24,7 @@ export default function Waveform({
   selection = null, selectable = false, onSelectionChange,
   slices = [], selectedSliceId = null, onSliceDown, onEdgeDrag,
   tool = 'select', onTapTime,
-  markers = [], getLive = null,
+  markers = [], getLive = null, warn = false,
   label = 'Forma de onda',
 }) {
   const wrapRef = useRef(null)
@@ -74,7 +74,7 @@ export default function Waveform({
       ctx.fillRect(x1, 0, x2 - x1, h)
     }
     if (selection) {
-      ctx.fillStyle = C.selectSoft
+      ctx.fillStyle = warn ? 'rgba(255, 75, 75, 0.16)' : C.selectSoft
       ctx.fillRect(toX(selection.start), 0, toX(selection.end) - toX(selection.start), h)
     }
 
@@ -126,7 +126,7 @@ export default function Waveform({
     if (selection) {
       for (const [t, name] of [[selection.start, 'INICIO'], [selection.end, 'FIN']]) {
         const x = toX(t)
-        ctx.fillStyle = C.select
+        ctx.fillStyle = warn ? C.rec : C.select
         ctx.fillRect(x - 1, 0, 2, h)
         // pomo grande para arrastrar con el dedo
         ctx.beginPath(); ctx.arc(x, mid, 9, 0, Math.PI * 2); ctx.fill()
@@ -136,10 +136,10 @@ export default function Waveform({
         roundRect(ctx, tx, 2, tw, 18, 4)
         ctx.fillStyle = '#0b0c0e'
         ctx.fillText(name, tx + 5, 15)
-        ctx.fillStyle = C.select
+        ctx.fillStyle = warn ? C.rec : C.select
       }
     }
-  }, [peaks, size, view, sorted, selection, selectedSliceId, region, markers, dim])
+  }, [peaks, size, view, sorted, selection, selectedSliceId, region, markers, dim, warn])
 
   // ------------------------------------------------------------ capa en vivo (rAF)
   useEffect(() => {
@@ -291,7 +291,7 @@ function palette() {
   if (!pal) {
     pal = {
       sample: cssVar('--sample'), select: cssVar('--select'), selectSoft: cssVar('--select-soft'),
-      active: cssVar('--active'), muted: '#4a4f57', mono: cssVar('--mono'),
+      active: cssVar('--active'), rec: cssVar('--rec'), muted: '#4a4f57', mono: cssVar('--mono'),
     }
   }
   return pal

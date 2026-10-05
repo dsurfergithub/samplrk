@@ -109,3 +109,12 @@ describe('coach: grabación y quantize', () => {
     expect(react({ type: 'quantize:off' }, {}, seen).text).toContain('groove')
   })
 })
+
+describe('coach: old school y resampling', () => {
+  it('explica el truco de 45 rpm y la memoria llena', () => {
+    expect(react({ type: 'rpm:45' }).text).toMatch(/5 semitonos/)
+    expect(react({ type: 'memory:full' }).kind).toBe('hint')
+    expect(react({ type: 'oldschool:on' }).term).toBe('old school')
+    expect(react({ type: 'resample:done' }).term).toBe('resampling')
+  })
+})

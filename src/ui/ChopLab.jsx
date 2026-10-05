@@ -11,6 +11,8 @@ import ChopTools from './ChopTools'
 import ChopInspector from './ChopInspector'
 import CoachLine from './CoachLine'
 import MissionHead from './MissionHead'
+import MemoryMeter from './MemoryMeter'
+import { oldSchoolOf } from '../engines/oldSchool'
 import { useLearning } from '../state/learningStore'
 import { currentMission } from '../engines/missions'
 import { useProject } from '../state/projectStore'
@@ -18,7 +20,7 @@ import { useUi } from '../state/uiStore'
 import { getActiveBuffer, cutRegion, goto } from '../actions/sampleActions'
 import { createChops, hitSlice, moveSliceEdge, splitAt } from '../actions/samplerActions'
 import { padLetter } from '../engines/sliceModel'
-import { liveState } from './hooks'
+import { liveState, useActiveBuffer } from './hooks'
 
 export default function ChopLab() {
   const sample = useProject(p => p.samples.find(s => s.id === p.activeSampleId))
@@ -27,11 +29,14 @@ export default function ChopLab() {
   const selectedSliceId = useUi(s => s.selectedSliceId)
   const tool = useUi(s => s.chopTool)
   const mode = useProject(p => p.mode)
+  const osRaw = useProject(p => p.settings?.oldSchool)
+  const os = oldSchoolOf({ settings: { oldSchool: osRaw } })
+  const noHelpers = os.enabled && os.noHelpers
   const missionHere = useLearning(s => {
     const m = currentMission(s.progress, s.skipped)
     return mode === 'learning' && !s.exploring && !!m && m.screens.includes('chop')
   })
-  const buffer = useMemo(() => getActiveBuffer(), [sample?.id])
+  const buffer = useActiveBuffer()
 
   const slices = useMemo(() => allSlices.filter(s => s.sampleId === sample?.id), [allSlices, sample?.id])
   const slicesById = useMemo(() => new Map(slices.map(s => [s.id, s])), [slices])
@@ -56,6 +61,7 @@ export default function ChopLab() {
           ? 'Toca los pads con el dedo, el ratón o el teclado. Primero en orden… y después como quieras.'
           : 'Cada trozo irá a un pad. Puedo sugerirte cortes, o puedes hacerlos tú.'} />
       <CoachLine />
+      <MemoryMeter />
 
       <Waveform
         buffer={buffer} fit={fit} region={region}
@@ -73,7 +79,8 @@ export default function ChopLab() {
           <div className="suggest-grid">
             <button className="btn btn-big" onClick={() => createChops(4)}><Grid2x2 size={18} /> 4 cortes</button>
             <button className="btn btn-big" onClick={() => createChops(8)}><Grid3x3 size={18} /> 8 cortes</button>
-            <button className="btn btn-big" onClick={() => createChops('hits')}><AudioWaveform size={18} /> Detectar golpes</button>
+            <button className="btn btn-big" onClick={() => createChops('hits')} disabled={noHelpers}
+              title={noHelpers ? 'Old School sin ayudas: corta a oído, como entonces' : undefined}><AudioWaveform size={18} /> Detectar golpes</button>
             <button className="btn btn-big" onClick={() => createChops('manual')}><Scissors size={18} /> Yo corto</button>
           </div>
         </div>

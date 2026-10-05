@@ -9,6 +9,7 @@ import { useLearning } from '../state/learningStore'
 import { useProject } from '../state/projectStore'
 import { checklist } from '../engines/missions'
 import { setMode, resetProgress, goToCurrentMission } from '../actions/learningActions'
+import { goto } from '../actions/sampleActions'
 
 export default function ProgressPanel() {
   const [open, setOpen] = useState(false)
@@ -65,7 +66,11 @@ export default function ProgressPanel() {
             {mode === 'learning' ? 'Misiones cortas, una cada vez. Puedes saltarlas o experimentar cuando quieras.'
               : 'Todo disponible, sin misiones. El coach está apagado (lo puedes encender con la bombilla).'}
           </p>
-          <button className="link-btn" onClick={resetProgress}>Reiniciar progreso</button>
+          <div className="row">
+            <button className="link-btn" onClick={() => { goto('oldschool'); setOpen(false) }}>Modo Old School →</button>
+            <span className="spacer" />
+            <button className="link-btn" onClick={resetProgress}>Reiniciar progreso</button>
+          </div>
         </section>
       )}
     </div>

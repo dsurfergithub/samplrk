@@ -30,6 +30,7 @@ import { useUi, setUi } from '../state/uiStore'
 import { MISSIONS, currentMissionIndex } from '../engines/missions'
 import { PITCH_MIN, PITCH_MAX, pitchedDuration, formatSemitones } from '../engines/pitch'
 import { sliceDuration } from '../engines/sliceModel'
+import { compensatingPitch } from '../engines/oldSchool'
 import {
   setSlicePitch, toggleReverse, setSliceGain, renameSlice, resetSlice, movePad, hitSlice,
 } from '../actions/samplerActions'
@@ -37,8 +38,10 @@ import {
 const fmtSec = (s) => `${s.toFixed(2).replace('.', ',')} s`
 
 export default function ChopInspector({ slice, letter }) {
+  const speed = useProject(p => p.samples.find(s => s.id === slice.sampleId)?.edits?.speed ?? 1)
   const orig = sliceDuration(slice)
-  const now = pitchedDuration(orig, slice.pitch)
+  // a 45 rpm el chop ya suena acelerado; el pitch se suma a esa velocidad
+  const now = pitchedDuration(orig, slice.pitch) / speed
   const max = Math.max(orig, now)
   const show = useDisclosure()
 
@@ -71,6 +74,16 @@ export default function ChopInspector({ slice, letter }) {
           <button className="btn btn-icon" onClick={() => { setSlicePitch(slice.id, slice.pitch + 1); setTimeout(() => hitSlice(slice.id), 0) }} disabled={slice.pitch >= PITCH_MAX} aria-label="Subir un semitono"><Plus size={16} /></button>
           <output className="pitch-val">{formatSemitones(slice.pitch)}</output>
         </div>
+        {speed !== 1 && (
+          <p className="rpm-note">
+            Sampleado a 45 rpm: suena más rápido y agudo.
+            {slice.pitch !== compensatingPitch(speed) && (
+              <button className="link-btn" onClick={() => { setSlicePitch(slice.id, compensatingPitch(speed)); setTimeout(() => hitSlice(slice.id), 0) }}>
+                Devolver su tono ({compensatingPitch(speed)})
+              </button>
+            )}
+          </p>
+        )}
         <div className="dur-bars" aria-label={`Duración original ${fmtSec(orig)}, ahora ${fmtSec(now)}`}>
           <div className="dur-row"><span>Original</span><i style={{ width: `${(orig / max) * 100}%` }} /><b>{fmtSec(orig)}</b></div>
           <div className="dur-row is-now"><span>Ahora</span><i style={{ width: `${(now / max) * 100}%` }} /><b>{fmtSec(now)}</b></div>

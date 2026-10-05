@@ -99,7 +99,8 @@ function removeVoice(v) {
  * Devuelve { src, gain, startAt, endAt } o null si el trozo está vacío.
  */
 export function buildVoice(ctx, dest, buffer, slice, at, velocity = 1) {
-  const rate = semitonesToRate(slice.pitch)
+  // pitch del pad × velocidad a la que se sampleó el disco (33 rpm = 1, 45 rpm = 1,35)
+  const rate = semitonesToRate(slice.pitch) * (slice.speed ?? 1)
   const start = Math.max(0, Math.min(slice.start, buffer.duration))
   const end = Math.max(start, Math.min(slice.end, buffer.duration))
   const len = end - start

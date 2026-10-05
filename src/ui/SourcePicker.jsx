@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 import { Play, Square, Upload, Disc3 } from 'lucide-react'
 import { PRACTICE_SAMPLES } from '../engines/demo/practiceSamples'
 import { ACCEPT_ATTR } from '../engines/audioImport'
-import { openPractice, auditionPractice, importAudioFile, stopPreview } from '../actions/sampleActions'
+import { openPractice, auditionPractice, importAudioFile, stopPreview, goto } from '../actions/sampleActions'
 import { usePreviewing } from './hooks'
 import MissionHead from './MissionHead'
 
@@ -59,6 +59,10 @@ export default function SourcePicker() {
         <input ref={fileRef} type="file" hidden accept={ACCEPT_ATTR}
           onChange={e => { importAudioFile(e.target.files[0]); e.target.value = '' }} />
       </div>
+      <button className="os-teaser" onClick={() => goto('oldschool')}>
+        <span><b>Modo Old School</b> · samplea como en los 80: 10 segundos de memoria, 12 bits, 8 pads.</span>
+        <span className="os-teaser-go">Probar →</span>
+      </button>
       <p className="fineprint">Si vas a publicar música que usa grabaciones de otras personas, asegúrate de tener los derechos necesarios.</p>
     </section>
   )

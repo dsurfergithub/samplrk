@@ -4,16 +4,17 @@
  * y llévatelo en WAV. Desde aquí se sigue editando o se empieza otro.
  */
 import { useEffect, useState } from 'react'
-import { Play, Square, Download, Pencil, Plus } from 'lucide-react'
+import { Play, Square, Download, Pencil, Plus, Repeat2 } from 'lucide-react'
 import MissionHead from './MissionHead'
 import MixPanel from './MixPanel'
 import CoachLine from './CoachLine'
+import MemoryMeter from './MemoryMeter'
 import { useProject } from '../state/projectStore'
 import { useRecorder } from '../state/recorderStore'
 import { beatSummary } from '../engines/beatPlan'
 import { drumById } from '../engines/drumKit'
 import { getBpm, togglePlay } from '../actions/patternActions'
-import { exportBeatWav } from '../actions/beatActions'
+import { exportBeatWav, resampleBeat } from '../actions/beatActions'
 import { ensureKit } from '../actions/drumActions'
 import { goto } from '../actions/sampleActions'
 import { notify } from '../actions/learningActions'
@@ -46,6 +47,7 @@ export default function BeatResult() {
       <MissionHead screen="beat" eyebrow={['Beat', 'Resultado']} title="Tu primer beat."
         sub="Escúchalo, llévatelo o sigue cambiándolo. No hay un beat correcto: este es el tuyo." />
       <CoachLine />
+      <MemoryMeter />
 
       {empty ? (
         <div className="hint-card">
@@ -85,6 +87,11 @@ export default function BeatResult() {
               ))}
             </div>
             <button className="btn btn-primary btn-big" onClick={() => exportBeatWav(loops)}><Download size={18} /> Exportar WAV</button>
+          </div>
+
+          <div className="resample-bar">
+            <p><b>Resamplear</b>: convierte este beat en un sample nuevo y vuelve a trocearlo. El original queda guardado.</p>
+            <button className="btn btn-big" onClick={resampleBeat}><Repeat2 size={18} /> Resamplear</button>
           </div>
 
           <MixPanel />

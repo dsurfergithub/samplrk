@@ -10,11 +10,14 @@ import { getCtx } from '../engines/audioEngine'
 import { padLetter, visiblePadCount } from '../engines/sliceModel'
 import { DEFAULT_KEYMAP, keyLabel } from '../engines/keyboardMap'
 import { hitPad } from '../actions/samplerActions'
+import { useProject } from '../state/projectStore'
 
 export default function PadGrid({ pads, slicesById, buffer, selectedSliceId }) {
   const els = useRef([])
   const timers = useRef([])
-  const count = visiblePadCount(pads)
+  const os = useProject(p => p.settings?.oldSchool)
+  // Old School: 8 pads, como en las máquinas de entonces
+  const count = os?.enabled ? Math.min(visiblePadCount(pads), os.maxPads ?? 8) : visiblePadCount(pads)
 
   const registerEl = useCallback((i, el) => { els.current[i] = el }, [])
   const onHit = useCallback((i) => hitPad(i), [])

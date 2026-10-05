@@ -11,18 +11,20 @@ import Waveform from './Waveform'
 import CoachLine from './CoachLine'
 import MissionHead from './MissionHead'
 import { useProject } from '../state/projectStore'
-import { getActiveBuffer, previewAll, previewRange, stopPreview, confirmCut } from '../actions/sampleActions'
+import { getActiveBuffer, previewAll, previewRange, stopPreview, confirmCut, setSampleSpeed } from '../actions/sampleActions'
+import { oldSchoolOf, fitsInMemory, speedOf, SPEED_45 } from '../engines/oldSchool'
+import MemoryMeter from './MemoryMeter'
 import { notify } from '../actions/learningActions'
 import { previewPosition } from '../engines/audioEngine'
 import { peaksFor } from '../engines/waveformPeaks'
 import { startHint, loopHint } from '../engines/cutHints'
-import { usePreviewing, liveState } from './hooks'
+import { usePreviewing, liveState, useActiveBuffer } from './hooks'
 
 const NUDGE = 0.01
 
 export default function CutLab() {
   const sample = useProject(p => p.samples.find(s => s.id === p.activeSampleId))
-  const buffer = useMemo(() => getActiveBuffer(), [sample?.id])
+  const buffer = useActiveBuffer()
   if (!sample || !buffer) return null
   return <Cutter key={sample.id} sample={sample} buffer={buffer} />
 }
@@ -36,6 +38,9 @@ function Cutter({ sample, buffer }) {
   const [looping, setLooping] = useState(false)
   const [showHit, setShowHit] = useState(false)
   const previewing = usePreviewing()
+  const project = useProject(p => p)
+  const os = oldSchoolOf(project)
+  const speed = speedOf(sample)
 
   // la primera vez que hay un fragmento elegido, has "encontrado" algo
   const hasSel = sel !== null
@@ -53,11 +58,14 @@ function Cutter({ sample, buffer }) {
     return () => clearTimeout(restart.current)
   }, [sel?.start, sel?.end, looping])
 
-  const hint = sel ? startHint(sel.start, sample.analysis?.transients) : null
+  // Old School «sin ayudas»: nada de pistas automáticas, solo el oído
+  const helpers = !(os.enabled && os.noHelpers)
+  const hint = sel && helpers ? startHint(sel.start, sample.analysis?.transients) : null
   const loopMsg = useMemo(
-    () => (looping && sel ? loopHint(peaksFor(buffer).mono, buffer.sampleRate, sel.start, sel.end) : null),
-    [looping, sel?.start, sel?.end, buffer],
+    () => (helpers && looping && sel ? loopHint(peaksFor(buffer).mono, buffer.sampleRate, sel.start, sel.end) : null),
+    [helpers, looping, sel?.start, sel?.end, buffer],
   )
+  const mem = sel ? fitsInMemory(project, sel.end - sel.start, speed, sample.id) : null
 
   const hereIsSomething = () => {
     const t = previewPosition() ?? 0
@@ -89,6 +97,9 @@ function Cutter({ sample, buffer }) {
         <MissionHead screen="cut" eyebrow={['Find', 'Encuentra']} title="Escucha la grabación."
           sub="Cuando oigas algo que te guste —un acorde, un golpe, una frase— pulsa «Aquí hay algo»." />
         <CoachLine />
+        {/* mismo hueco que la barra Old School de la fase «cortar»: así la onda no se
+            vuelve a montar a mitad de un arrastre al pasar de escuchar a cortar */}
+        {os.enabled && <div className="os-cutbar"><MemoryMeter /></div>}
         <Waveform buffer={buffer} dim selectable onSelectionChange={setSel} getLive={liveState}
           className="wave-listen" label={`Grabación «${sample.name}». Arrastra para elegir un fragmento.`} />
         <div className="listen-actions">
@@ -116,7 +127,21 @@ function Cutter({ sample, buffer }) {
         sub="Arrastra los tiradores azules. Escucha, mueve, vuelve a escuchar: tu oído decide." />
       <CoachLine />
 
-      <Waveform buffer={buffer} fit={fit} selection={sel} selectable onSelectionChange={setSel}
+      {os.enabled && (
+        <div className="os-cutbar">
+          <MemoryMeter used={mem ? mem.used + mem.need : undefined} />
+          <div className="rpm" role="radiogroup" aria-label="Velocidad del disco al samplear">
+            <span className="insp-label">Disco</span>
+            <div className="segmented">
+              {[[1, '33 rpm'], [SPEED_45, '45 rpm']].map(([v, label]) => (
+                <button key={label} role="radio" aria-checked={speed === v} className={`btn${speed === v ? ' is-on' : ''}`}
+                  onClick={() => { setSampleSpeed(v); if (looping && sel) setTimeout(() => previewRange(sel.start, sel.end, { loop: true }), 0) }}>{label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      <Waveform buffer={buffer} fit={fit} selection={sel} selectable onSelectionChange={setSel} warn={mem && !mem.fits}
         markers={markers} getLive={liveState} className="wave-cut"
         label={`Fragmento de ${len.toFixed(1)} segundos`} />
 
@@ -150,7 +175,10 @@ function Cutter({ sample, buffer }) {
         <button className={`btn${looping ? ' is-on' : ''}`} onClick={toggleLoop} aria-pressed={looping}><Repeat size={16} /> Repetir</button>
         <button className="btn btn-ghost" onClick={() => { stopPreview(); setSel(null); setMark(null); setFit(null) }}><RotateCcw size={16} /> Escuchar todo otra vez</button>
         <span className="spacer" />
-        <button className="btn btn-primary btn-big" onClick={() => confirmCut(sel.start, sel.end)}><Check size={20} /> Este es mi sample</button>
+        {mem && !mem.fits && (
+          <p className="os-nofit">No cabe en la memoria: ocupa {mem.need.toFixed(1).replace('.', ',')} s y te quedan {mem.free.toFixed(1).replace('.', ',')} s.{speed === 1 ? ' Acórtalo o prueba a 45 rpm.' : ' Acórtalo.'}</p>
+        )}
+        <button className="btn btn-primary btn-big" disabled={mem && !mem.fits} onClick={() => confirmCut(sel.start, sel.end)}><Check size={20} /> Este es mi sample</button>
       </div>
     </section>
   )

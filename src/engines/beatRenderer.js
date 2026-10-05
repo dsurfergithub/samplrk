@@ -12,8 +12,11 @@ import { mixOf } from './projectModel'
 const SR = 44100
 const CUT_FADE = 0.008
 
-/** Renderiza `loops` vueltas del beat. `sampleBuffer` es el audio del sample activo. */
-export async function renderBeat(project, { bpm, loops = 1, sampleBuffer }) {
+/**
+ * Renderiza `loops` vueltas del beat. `chopVoice(slice)` devuelve { buffer, slice } tal y
+ * como suena en vivo (audio Old School y velocidad 33/45 incluidos).
+ */
+export async function renderBeat(project, { bpm, loops = 1, chopVoice }) {
   const pads = project.padBanks[0].pads
   const sliceOf = (padId) => project.slices.find(s => s.id === pads[padId]) ?? null
   const tracks = project.patterns.map(pattern => {
@@ -50,9 +53,10 @@ export async function renderBeat(project, { bpm, loops = 1, sampleBuffer }) {
       if (!buffer) continue
       slice = drumAsSlice(h.event.padId, buffer, project.drumKit?.pads.find(x => x.id === h.event.padId))
     } else {
-      buffer = sampleBuffer
-      slice = sliceOf(h.event.padId)
-      if (!slice) continue
+      const s0 = sliceOf(h.event.padId)
+      if (!s0) continue
+      ;({ buffer, slice } = chopVoice(s0))
+      if (!buffer) continue
     }
     const v = buildVoice(ctx, bus[h.kind === 'drums' ? 'drums' : 'chops'], buffer, slice, h.at, h.event.velocity ?? 1)
     if (v && h.cutAt !== null && h.cutAt < v.endAt) {

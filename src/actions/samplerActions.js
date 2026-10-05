@@ -7,7 +7,8 @@ import { clampPitch } from '../engines/pitch'
 import { triggerSlice } from '../engines/samplerEngine'
 import { commit, getProject } from '../state/projectStore'
 import { getUi, setUi, showToast } from '../state/uiStore'
-import { getActiveSample, getActiveBuffer, cutRegion, whenAnalyzed } from './sampleActions'
+import { getActiveSample, getPlayableBuffer, playableSlice, cutRegion, whenAnalyzed } from './sampleActions'
+import { oldSchoolOf } from '../engines/oldSchool'
 import { notify, recordHit } from './learningActions'
 import { captureHit } from './patternActions'
 
@@ -34,6 +35,9 @@ export async function createChops(mode) {
   const sample = getActiveSample()
   if (!sample) return
   const { start, end } = cutRegion(sample)
+  const os = oldSchoolOf(getProject())
+  const limit = os.enabled ? os.maxPads : SM.MAX_PADS
+  if (os.enabled && typeof mode === 'number') mode = Math.min(mode, limit)
   let slices
 
   if (mode === 'hits') {
@@ -43,7 +47,7 @@ export async function createChops(mode) {
       analysis = await whenAnalyzed(sample.id)
       setUi({ busy: null })
     }
-    slices = SM.slicesFromHits(sample.id, start, end, analysis?.transients ?? [], 16)
+    slices = SM.slicesFromHits(sample.id, start, end, analysis?.transients ?? [], limit)
     if (slices.length < 2) {
       showToast('No encuentro golpes claros en este fragmento. Prueba con 8 cortes iguales o corta tú.')
       return
@@ -78,6 +82,9 @@ export function splitAt(t = null, sliceId = null) {
   const p = getProject()
   const target = sliceId ? sliceById(sliceId, p) : SM.sliceAt(p.slices, t)
   if (!target) return
+  const os = oldSchoolOf(p)
+  const own = p.slices.filter(s => s.sampleId === target.sampleId).length
+  if (os.enabled && own >= os.maxPads) { showToast(`En Old School tienes ${os.maxPads} pads: une o borra un chop para hacer sitio.`); return }
   if (p.slices.length >= SM.MAX_PADS) { showToast('Ya tienes 16 chops: es el máximo de pads.'); return }
   const r = SM.splitSlice(p.slices, target.id, t)
   if (!r) { showToast('Ese trozo es demasiado corto para dividirlo.'); return }
@@ -161,9 +168,9 @@ export function hitPad(index, velocity = 1) {
   const id = bank(p).pads[index]
   if (!id) return
   const slice = sliceById(id, p)
-  const buffer = getActiveBuffer(p)
+  const buffer = slice && getPlayableBuffer(slice.sampleId, p)
   if (!slice || !buffer) return
-  const voice = triggerSlice(buffer, slice, { padKey: index, velocity })
+  const voice = triggerSlice(buffer, playableSlice(slice, p), { padKey: index, velocity })
   // después del sonido: grabación (si la hay), selección y coach
   if (voice) captureHit('chops', index, voice.startAt, voice.endAt - voice.startAt, velocity)
   select(id)
@@ -177,7 +184,7 @@ export function hitSlice(sliceId) {
   const i = SM.padIndexOf(bank(p).pads, sliceId)
   if (i >= 0) { hitPad(i); return }
   const slice = sliceById(sliceId, p)
-  const buffer = getActiveBuffer(p)
-  if (slice && buffer) triggerSlice(buffer, slice, { padKey: `slice:${sliceId}` })
+  const buffer = slice && getPlayableBuffer(slice.sampleId, p)
+  if (slice && buffer) triggerSlice(buffer, playableSlice(slice, p), { padKey: `slice:${sliceId}` })
   select(sliceId)
 }

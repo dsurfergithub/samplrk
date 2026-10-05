@@ -12,6 +12,7 @@ import PatternLane from './PatternLane'
 import TempoControl from './TempoControl'
 import MixPanel from './MixPanel'
 import CoachLine from './CoachLine'
+import MemoryMeter from './MemoryMeter'
 import MissionHead from './MissionHead'
 import { useProject } from '../state/projectStore'
 import { useUi } from '../state/uiStore'
@@ -26,7 +27,7 @@ import { setMetronomeVolume, getMetronomeVolume } from '../engines/metronomeEngi
 import { lengthBeats } from '../engines/patternEngine'
 import { padLetter } from '../engines/sliceModel'
 import { drumById, getDrumBuffer } from '../engines/drumKit'
-import { useSequencerPhase } from './hooks'
+import { useSequencerPhase, useActiveBuffer } from './hooks'
 import { useLearning } from '../state/learningStore'
 import { currentMission } from '../engines/missions'
 
@@ -57,7 +58,7 @@ export default function RecordLab({ track = 'chops' }) {
   const selectedSliceId = useUi(s => s.selectedSliceId)
   const { take, bars, countIn, metronome } = useRecorder(s => s)
   const phase = useSequencerPhase()
-  const buffer = useMemo(() => getActiveBuffer(), [sample?.id])
+  const buffer = useActiveBuffer()
   const slicesById = useMemo(() => new Map(allSlices.filter(s => s.sampleId === sample?.id).map(s => [s.id, s])), [allSlices, sample?.id])
   const [kitReady, setKitReady] = useState(!!getDrumBuffer('kick'))
   const mode = useProject(p => p.mode)
@@ -109,6 +110,7 @@ export default function RecordLab({ track = 'chops' }) {
         title={busy ? (phase === 'countin' ? 'Prepárate…' : 'Toca ahora.') : copy.idle}
         sub={busy ? 'Todo lo que toques se anota tal cual, sin corregir.' : copy.sub} />
       <CoachLine />
+      <MemoryMeter />
 
       <TempoControl disabled={busy} />
       <div className="lanes">

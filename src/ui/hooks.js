@@ -1,4 +1,6 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
+import { useProject } from '../state/projectStore'
+import { getActiveBuffer } from '../actions/sampleActions'
 import { subscribePreview, isPreviewing, previewPosition } from '../engines/audioEngine'
 import { activeVoices } from '../engines/samplerEngine'
 import { shouldIgnoreKey, padForCode } from '../engines/keyboardMap'
@@ -9,6 +11,17 @@ import { drumForCode } from '../engines/drumKit'
 import { subscribeSequencer, getSequencerSnapshot } from '../engines/sequencer'
 import { undo, redo } from '../state/projectStore'
 import { getUi } from '../state/uiStore'
+
+/**
+ * El buffer del sample activo tal y como suena (cambia si activas Old School
+ * o pasas de 33 a 45 rpm).
+ */
+export function useActiveBuffer() {
+  const sampleId = useProject(p => p.activeSampleId)
+  const os = useProject(p => p.settings?.oldSchool)
+  const speed = useProject(p => p.samples.find(s => s.id === p.activeSampleId)?.edits?.speed)
+  return useMemo(() => getActiveBuffer(), [sampleId, os, speed])
+}
 
 /** ¿Está sonando la preescucha? (cambia pocas veces: React está bien aquí). */
 export function usePreviewing() {

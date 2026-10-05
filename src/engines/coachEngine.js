@@ -125,6 +125,30 @@ export function react(event, ctx = {}, seen = new Set()) {
         text: `Has grabado tu primer pattern (${event.count} golpes). SAMPLRK no ha grabado audio: ha anotado qué pad tocaste y cuándo. Por eso, si cambias el pitch de un chop, la toma suena distinta al instante.`,
       })
 
+    case 'oldschool:on':
+      return once('learned:oldschool', {
+        kind: 'learned', term: 'old school',
+        text: 'Los primeros samplers tenían límites técnicos —poca memoria, 12 bits, pocos kHz— que acabaron formando parte de su sonido. Con tan poco espacio, cada segundo cuenta: ¿cómo lo vas a aprovechar?',
+      })
+
+    case 'rpm:45':
+      return once('learned:rpm', {
+        kind: 'learned', term: '33 / 45 rpm',
+        text: 'Estás sampleando «a 45»: el disco suena más rápido y agudo, pero ocupa menos memoria. Después baja unos 5 semitonos el pitch de tus chops para devolverles su tono: sonarán más crujientes.',
+      })
+
+    case 'memory:full':
+      return {
+        id: 'hint:memory-full', kind: 'hint',
+        text: 'Se acabó la memoria. Así se trabajaba en los 80: acorta el fragmento, quédate con lo esencial o samplea a 45 rpm.',
+      }
+
+    case 'resample:done':
+      return once('learned:resample', {
+        kind: 'learned', term: 'resampling',
+        text: 'Eso es resampling: tu beat, con sus chops, pitch y batería, convertido en un sample nuevo. Ahora puedes trocearlo otra vez.',
+      })
+
     case 'midi:soft':
       return once('learned:velocity', {
         kind: 'learned', term: 'velocity',

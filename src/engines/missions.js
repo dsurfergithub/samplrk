@@ -92,6 +92,13 @@ export const MISSIONS = [
     sub: 'Dale al play. Si te gusta, expórtalo como WAV para llevártelo.',
     success: 'Este es tu primer beat. Lo has hecho tú, trozo a trozo.',
   },
+  {
+    id: 'resample', step: 'Beat', screens: ['beat'], done: p => p.resampleComplete, covers: ['learned:resample'],
+    title: 'Resamplea tu beat.',
+    sub: 'Pulsa «Resamplear»: tu beat entero se convierte en un sample nuevo que puedes volver a trocear. El original queda guardado.',
+    success: 'Eso es resampling: tu propio beat convertido en material nuevo para seguir creando.',
+    fact: 'Resamplear también servía para ahorrar memoria y pads: varias capas se convertían en un solo sonido que ocupaba un pad.',
+  },
 ]
 
 /**
@@ -101,15 +108,13 @@ export const MISSIONS = [
 export const COVERED_MESSAGES = new Set(MISSIONS.flatMap(m => m.covers ?? []))
 
 /** Misiones futuras: se ven en la lista de progreso, todavía no se pueden hacer. */
-export const UPCOMING = [
-  { id: 'resample', label: 'Resamplear' },
-]
+export const UPCOMING = []
 
 export const CHECKLIST_LABELS = {
   find: 'Encontrar un momento', loop: 'Crear un loop', cut: 'Cortar un sample',
   chop: 'Crear chops', play: 'Tocar los pads', reorder: 'Hacer un flip (cambiar el orden)',
   record: 'Grabar un pattern', pitch: 'Cambiar el pitch', reverse: 'Usar reverse',
-  drums: 'Añadir batería', beat: 'Escuchar tu primer beat',
+  drums: 'Añadir batería', beat: 'Escuchar tu primer beat', resample: 'Resamplear',
 }
 
 export const isDone = (m, progress, skipped = []) => !!m.done(progress) || skipped.includes(m.id)

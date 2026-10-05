@@ -28,6 +28,7 @@ const PROGRESS_BY_EVENT = {
   'reverse:on': ['reverseComplete'],
   'beat:played': ['beatComplete'],
   'beat:exported': ['beatComplete'],
+  'resample:done': ['resampleComplete'],
 }
 
 /** Golpes seguidos que cuentan como «has tocado los pads». */
