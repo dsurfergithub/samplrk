@@ -6,7 +6,7 @@ SAMPLRK enseña sampling desde cero, haciéndolo: escuchas una grabación, encue
 
 No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: la app ayuda **después** de que actúes, nunca antes.
 
-## Estado: SAMPLRK 2 · Fases 1, 2 y 3 (sampler, grabación y aprendizaje)
+## Estado: SAMPLRK 2 · Fases 1–4 (sampler, grabación, aprendizaje y batería)
 
 - ✅ Discos de práctica: piano real (fragmentos con licencia libre de josefpres/Freesound, ver `src/assets/practice/CREDITS.md`) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz)
 - ✅ Importar WAV/MP3 (y otros formatos si tu navegador los abre), con errores comprensibles
@@ -16,11 +16,13 @@ No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: 
 - ✅ Flip: reordenar chops, pitch old school (cambia también la duración) y reverse por chop
 - ✅ Grabar lo que tocas: cuenta atrás, 1/2/4 compases, metrónomo opcional, bucle, «¿te la quedas?»
 - ✅ Tempo con ±, ×2, ÷2 y Tap; quantize opcional y no destructivo (antes / después)
+- ✅ Batería (bombo, caja, charles) con teclas J K L Ñ, grabada encima de tus chops y sumando tomas; el charles cerrado corta al abierto
+- ✅ «Tu primer beat»: escúchalo, mira lo que has usado y expórtalo en WAV; mezcla sencilla (sample, batería, general)
 - ✅ Deshacer / rehacer (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
-- ✅ Modo Aprendizaje: 9 misiones cortas (escuchar, loop, cortar, chops, tocar, flip, grabar, pitch, reverse), cada una en su pantalla, con «Seguir» / «Quedarme aquí y experimentar» y «Saltar»
+- ✅ Modo Aprendizaje: 11 misiones cortas (escuchar, loop, cortar, chops, tocar, flip, grabar, pitch, reverse, batería, beat), cada una en su pantalla, con «Seguir» / «Quedarme aquí y experimentar» y «Saltar»
 - ✅ Sampling Basics: lista de lo practicado (sin notas de calidad) y Modo Libre sin misiones
 - ✅ Coach determinista y offline: habla después de la acción y no repite lo que explica la misión
-- 🔜 Fase 4 batería · 5 guardado local · 6 MIDI · 7 Old School · 8 avanzado
+- 🔜 Fase 5 guardado local · 6 MIDI · 7 Old School · 8 avanzado
 
 La interfaz anterior (v0.1: loops, escenas, timeline) sigue disponible en `#/legacy`.
 

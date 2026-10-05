@@ -387,3 +387,37 @@ Limitaciones conocidas:
 - El progreso de aprendizaje se pierde al recargar (Fase 5, persistencia).
 - Si se reinicia el progreso con un proyecto ya trabajado, las misiones vuelven a pedir acciones ya hechas (se pueden saltar).
 - Retos («haz un beat con solo 4 chops»…) y tarjetas históricas ampliadas quedan para más adelante.
+
+---
+
+## 12. Fase 4 — Drums y «Tu primer beat» (cerrada)
+
+**Objetivo:** darle ritmo a la frase sampleada y cerrar el recorrido con un beat que se puede escuchar y exportar.
+
+Implementado:
+- **Kit SAMPLRK** (`drumKit.js`): bombo, caja, charles cerrado y abierto, sintetizados en el navegador con código propio
+  (sin derechos de terceros). Teclas **J K L Ñ** (mano derecha: nunca chocan con las de los chops).
+- **Mismo sampler, sin segundo motor**: cada pieza de batería es un "slice" de todo su buffer. El sampler gana **buses**
+  (chops / batería, cada uno con su volumen) y **choke groups**: el charles cerrado corta al abierto, como en una batería real.
+- **Pantalla DRUMS**: tus chops suenan de fondo mientras grabas; la batería se graba **sumando** a lo que ya hay (bombo y caja en
+  una toma, charles en otra). Las dos pistas duran lo mismo (los compases se fijan con la primera). Quantize propio por pista.
+  Pads de batería visualmente distintos de los chops.
+- **Secuenciador con pistas de fondo** (`getBacking`): lo que ya existe suena desde el «1» incluso mientras grabas.
+- **Mezcla sencilla** (`MixPanel`): sample, batería y general (guardada en `project.settings.mix`).
+- **Pantalla BEAT — «Tu primer beat»**: play, duración, tempo, chops usados, transformaciones y batería (solo hechos, nunca una nota),
+  **Exportar WAV** (1 vuelta en loop exacto o 4 vueltas), Seguir editando y Crear otro (con aviso de que aún no se guarda).
+- **Export offline** (`beatRenderer.js` + `beatPlan.js`): misma receta que en vivo (`buildVoice`, buses, master con limitador) y el
+  mismo plan de cortes (re-disparo de un pad y choke). Lo que oyes es lo que exportas; render con OfflineAudioContext, sin grabar la salida.
+- Aprendizaje: misiones **10 Drums** («Vamos a darle ritmo») y **11 Beat** («Escucha tu primer beat»); el coach explica el **choke**
+  después de oírlo. Si llegas al beat sonando, escucharlo cuenta.
+
+Verificado (`npm test`: 105 tests; build; navegador a 1280 px y 375 px):
+- Chops 2 compases → batería K/S (8 golpes) con los chops de fondo → segunda toma de charles encima (16 golpes, «KHSH…»).
+- Compases fijados por la otra pista; resumen del beat correcto (4 de 8 chops, 16 golpes de batería).
+- WAV exportado: 4,0 s exactos (2 compases a 120 BPM), estéreo 44,1 kHz, pico 0,9 (limitador), audio real (RMS 0,19).
+- Recorrido completo de las 11 misiones con acciones reales; regresión de Fases 1–3 y `#/legacy` en verde.
+
+Limitaciones conocidas:
+- Un solo kit; sin ajustes por pieza en la interfaz (el modelo `drumKit.pads` ya guarda volumen y pitch por pieza).
+- Sin swing ni humanización (prevista: «groove»).
+- Sin persistencia: el beat se pierde al recargar (Fase 5). La pantalla lo avisa al «Crear otro».

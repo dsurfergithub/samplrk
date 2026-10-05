@@ -28,11 +28,14 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | Motor | Fichero | Responsabilidad |
 |---|---|---|
 | **Audio runtime** | `audioEngine.js` | `AudioContext` único (`latencyHint: 'interactive'`), master bus (ganancia → limitador suave), desbloqueo con estados `suspended/running/closed`, preescucha (una voz, en bucle opcional, con posición para playheads). Mantiene el transporte/escenas de v0.1. |
-| **Sampler** | `samplerEngine.js` | Voces de pad. Cada disparo = un `AudioBufferSourceNode` nuevo sobre el buffer original con offset (sin copiar audio). Pitch por `playbackRate` (old school: cambia la duración). Reverse con un buffer invertido cacheado por sample. Micro-fades anti-clic, polifonía con robo de voz, re-disparo del mismo pad corta su voz anterior. Emite eventos `start/end` para la UI. |
+| **Sampler** | `samplerEngine.js` | Voces de pad (chops y batería), buses con volumen (`chops`, `drums`), choke groups y `buildVoice` compartido con el export. Cada disparo = un `AudioBufferSourceNode` nuevo sobre el buffer original con offset (sin copiar audio). Pitch por `playbackRate` (old school: cambia la duración). Reverse con un buffer invertido cacheado por sample. Micro-fades anti-clic, polifonía con robo de voz, re-disparo del mismo pad corta su voz anterior. Emite eventos `start/end` para la UI. |
 | **Sample** | `sampleEngine.js` | `EditableSample` (sin cambios de v0.1) y registro runtime `id → AudioBuffer`. |
 | **Slices** | `sliceModel.js` | Puro. Crear (iguales / en golpes), dividir, unir, borrar, mover bordes enlazados; banco de 16 pads que referencia slices por id; orden original para el coach. |
 | **Patterns** | `patternEngine.js` | Puro. Eventos en beats (no audio), quantize no destructivo, ventanas para el scheduler, tap tempo y BPM inicial. |
 | **Secuenciador** | `sequencer.js` | Scheduler *lookahead* (25 ms / 120 ms) sobre el reloj del AudioContext: cuenta atrás, grabación y bucle; cambio de tempo sin saltos. La UI consulta `position()` por rAF y solo se suscribe a cambios de fase. |
+| **Batería** | `drumKit.js` | Kit sintetizado (bombo, caja, charles cerrado/abierto), teclas J K L Ñ, choke del charles; cada pieza se toca como un slice en el mismo sampler. |
+| **Plan del beat** | `beatPlan.js` | Puro. Golpes de chops + batería con su hora y su corte (re-disparo y choke); resumen objetivo del beat. |
+| **Export del beat** | `beatRenderer.js` | OfflineAudioContext con la misma receta que en vivo (`buildVoice`, buses, master + limitador) siguiendo el plan. |
 | **Metrónomo** | `metronomeEngine.js` | Clics con acento y volumen propio; cancelables al parar. |
 | **Pitch** | `pitch.js` | Puro. Semitonos ↔ rate ↔ duración. |
 | **Teclado** | `keyboardMap.js` | Puro. `KeyboardEvent.code` → pad (`1 2 3 4 / Q W E R / A S D F / Z X C V`). |
@@ -55,9 +58,12 @@ Project  { schemaVersion, id, name, createdAt, updatedAt, mode: 'learning'|'free
 Slice    { id, sampleId, start, end, name, color, pitch, gain, reversed,
            triggerMode: 'oneshot', fadeInMs, fadeOutMs, keyBinding, midiNote }
 PadBank  { id, name, pads: (sliceId | null)[16] }
-Pattern  { id, name, bars, bpm, quantize: 'off'|'1/4'|'1/8'|'1/16',
+Pattern  { id, name, kind: 'chops'|'drums', bars, bpm, quantize: 'off'|'1/4'|'1/8'|'1/16',
            events: [{ id, padId, beat, time, duration, velocity }] }
 ```
+
+En `drums`, `padId` es la pieza del kit ('kick', 'snare', 'hat', 'open'). Las dos pistas duran lo mismo.
+`DrumKit { id, name, pads: [{ id, gain, pitch }] }` y `settings.mix { chops, drums, master }` completan el proyecto.
 
 Un evento de pattern guarda el **pad** y el **beat** de tu toma original: nunca audio. El quantize se aplica al
 reproducir, así que «Original» siempre está disponible. Al reproducir, cada evento busca qué chop hay en su pad,
@@ -84,7 +90,8 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | Find | `SourcePicker` (cajas de discos de práctica + importar) |
 | Find + Cut + Loop | `CutLab` (escuchar → «Aquí hay algo» → INICIO/FIN → Repetir → «Este es mi sample») |
 | Chop + Play | `ChopLab`, `ChopTools`, `PadGrid`/`Pad`, `ChopInspector` |
-| Record | `RecordLab`, `TempoControl`, `PatternLane` (+ `TransportMini` en la barra superior) |
+| Record / Drums | `RecordLab` (pista `chops` o `drums`), `TempoControl`, `PatternLane`, `DrumPads`, `MixPanel` (+ `TransportMini` en la barra superior) |
+| Beat | `BeatResult` (resumen, play, Exportar WAV) |
 | Comunes | `Waveform` (+ `WaveOverview`), `MissionHead`, `StepBar`, `ProgressPanel`, `CoachLine`, `AudioGate`, `Toast` |
 
 ### Modo Aprendizaje vs Modo Libre
