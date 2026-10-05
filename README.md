@@ -1,25 +1,39 @@
 # SAMPLRK
 
-De cualquier sonido a un loop profesional: **Archivo → Sample editable → Loop inteligente → Capas → Canción**.
+**Aprende a convertir cualquier sonido en música.**
 
-App de creación musical basada en samples. No es un DAW: es un flujo mínimo para que cualquiera construya una base musical desde un único archivo de audio. Ver [ARCHITECTURE.md](ARCHITECTURE.md) para el diseño completo.
+SAMPLRK enseña sampling desde cero, haciéndolo: escuchas una grabación, encuentras un momento que te gusta, lo cortas, lo troceas en chops y lo tocas con pads. Sin teoría musical, sin experiencia previa, sin manual.
+
+No es un DAW ni compite con Ableton, MPC o Koala. Es más un instrumento-juego: la app ayuda **después** de que actúes, nunca antes.
+
+## Estado: SAMPLRK 2 · Fase 1 (sampler básico)
+
+- ✅ Discos de práctica originales (Soul, Funk, Jazz, Voz) sintetizados en el navegador: libres de derechos
+- ✅ Importar WAV/MP3 (y otros formatos si tu navegador los abre), con errores comprensibles
+- ✅ Escuchar → «Aquí hay algo» → ajustar INICIO/FIN → Repetir (loop) → «Este es mi sample»
+- ✅ Chop Lab: 4 / 8 cortes, detectar golpes, «yo corto»; dividir, unir, borrar, mover cortes, reordenar pads
+- ✅ 8 o 16 pads con ratón, touch y teclado (`1 2 3 4 / Q W E R`)
+- ✅ Pitch old school (cambia también la duración) y reverse por chop
+- ✅ Deshacer / rehacer (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
+- ✅ Coach determinista y offline: «prueba a romper el orden», «eso ya es un flip»…
+- 🔜 Fase 2 grabar patterns · 3 misiones completas · 4 batería · 5 guardado local · 6 MIDI · 7 Old School · 8 avanzado
+
+La interfaz anterior (v0.1: loops, escenas, timeline) sigue disponible en `#/legacy`.
 
 ## Comandos
 
 ```bash
 npm install
 npm run dev      # desarrollo (Vite)
-npm test         # tests unitarios (vitest: DSP + WAV)
+npm test         # tests unitarios (vitest)
 npm run build    # producción → dist/
 ```
 
-## Estado actual (v0.1)
+Funciona 100% en el navegador: sin backend, sin cuentas, sin API externa.
 
-- ✅ Importación: WAV/MP3/FLAC/OGG/M4A, vídeo (pista de audio), micrófono y beat sintético de prueba
-- ✅ Editable Sample no destructivo: trim, reverse, gain, normalize, fades, pitch, slices, zoom/selección en canvas
-- ✅ Análisis en Web Worker: BPM + confianza, rejilla de beats, tonalidad (Krumhansl), transitorios, silencios, energía
-- ✅ Generador de loops con Loop Validator (clics, continuidad, estabilidad) y anti-clic
-- ✅ Launchpad cuantizado al compás con BPM compartido, escenas y timeline (Intro/Verse/Drop…)
-- ✅ Exportación WAV de loop / sample / escena / canción (render offline)
-- ✅ Asistente basado en reglas que explica el motivo de cada sugerencia
-- 🗺️ Hoja de ruta: MP3/FLAC (codificadores), separación de instrumentos, persistencia de proyectos, automatizaciones por escena
+## Documentación
+
+- [SAMPLRK_2_PLAN.md](SAMPLRK_2_PLAN.md) — auditoría, decisiones y fases
+- [ARCHITECTURE.md](ARCHITECTURE.md) — motores, modelo de datos, estado y UI
+
+> Si vas a publicar música que usa grabaciones de terceros, asegúrate de tener los derechos necesarios.

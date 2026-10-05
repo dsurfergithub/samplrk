@@ -275,3 +275,34 @@ No incluye (fases siguientes): grabación de patterns, metrónomo, batería, per
 
 Este trabajo se desarrolla en la rama de la sesión (`claude/adoring-rubin-q40y5a`), que cumple el papel de
 `samplrk-2-learning`: `master` sigue intacto y funcionando con la v0.1.
+
+---
+
+## 9. Estado de la Fase 1 (cerrada)
+
+Verificado con `npm test` (63 tests), `npm run build` y recorridos automáticos en Chromium a 1280 px y 375 px:
+
+| Criterio | Resultado |
+|---|---|
+| Home → tocar un pad con un disco de práctica | ✅ 4 toques (Empezar → Samplear este → Este es mi sample → 8 cortes) + pad |
+| Importar WAV / archivo inválido | ✅ / ✅ «No he podido abrir este archivo de audio. Prueba con WAV o MP3.» |
+| 8 chops, ratón + touch + teclado | ✅ un disparo por toque (sin doble disparo táctil) |
+| Detectar golpes | ✅ cortes exactamente en los golpes del WAV de prueba |
+| Dividir / unir / borrar / deshacer / «yo corto» / arrastrar bordes | ✅ |
+| Pitch y reverse por chop | ✅ −4 st → rate 0,794; reverse lee el buffer invertido con offset reflejado |
+| Coach después de la acción | ✅ A B C D → «prueba a romper el orden… empieza por C»; C C A D → «eso ya es un flip» |
+| 375 px sin scroll horizontal, pads ≥ 72 px | ✅ pads de 86 px |
+| `#/legacy` | ✅ interfaz v0.1 intacta, chunk y CSS separados |
+
+### Limitaciones conocidas (previstas en fases siguientes)
+- Sin persistencia: refrescar pierde el proyecto (Fase 5).
+- Si se vuelve a CUT y se cambia el corte, los chops que quedan fuera se conservan (se ven atenuados); se decidirá en Fase 3 si se recortan o se avisa.
+- «Modo libre» es, por ahora, el mismo recorrido con el coach apagado.
+- La velocidad del pad es fija (sin presión/velocity hasta MIDI, Fase 6).
+- Las fuentes se cargan de Google Fonts; sin red se usa la fuente del sistema.
+- Probado en Chromium (escritorio y emulación móvil). Falta probar en Safari/iOS real.
+
+### Decisiones abiertas para afinar
+1. **Samples de práctica**: ahora son sintetizados con código propio. ¿Quieres añadir grabaciones reales con licencia libre?
+2. **Paso FLIP**: en el recorrido significa «transformar» (pitch, reverse…); el coach usa «flip» para reordenar chops. ¿Unificamos?
+3. **Teclado**: `1 2 3 4 / Q W E R` (16 pads: `+ A S D F / Z X C V`). ¿Te vale o prefieres otra disposición?
