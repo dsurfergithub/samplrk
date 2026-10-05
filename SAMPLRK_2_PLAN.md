@@ -464,3 +464,44 @@ Limitaciones conocidas:
   la forma de llevarse el beat. (Exportar/importar el proyecto como archivo: posible mejora futura.)
 - La toma pendiente («¿Te la quedas?») no se guarda hasta decidir; el historial de deshacer no sobrevive a recargar.
 - No hay sincronización entre pestañas: si abres SAMPLRK en dos a la vez, gana la última que guarda.
+
+---
+
+## 14. Fase 6 — MIDI (cerrada) y navegadores objetivo
+
+**Navegadores objetivo: Chrome y Safari** (macOS e iOS). Web MIDI solo existe en Chrome (y Edge); en Safari SAMPLRK
+funciona igual con teclado y pantalla, y lo explica.
+
+### MIDI
+- `midiMap.js` (puro): mensajes (note on/off, note on con velocity 0 = off, CC), nombres de nota (C3 = 60), curva de
+  velocity → volumen, mapas por defecto y MIDI learn.
+  - Chops: pads de controlador **36–51** (estándar MPC/Akai) y **teclas blancas desde C3** (C3 → A, D3 → B…).
+  - Batería (en la pantalla DRUMS): **General MIDI** (36 bombo, 38 caja, 42 charles, 46 abierto) y C3 D3 E3 F3.
+- `midiEngine.js`: acceso Web MIDI, todas las entradas, conexión/desconexión en caliente (con aviso).
+- **MIDI SETUP** (botón con teclado en la barra superior): Activar MIDI → dispositivos → «Pulsa una tecla de tu controlador»
+  → «Detectado: C3 · fuerza 98 → Pad A» → **Aprender** por pad (chops y batería) → Restablecer mapa / Desactivar.
+- **Velocity**: suena más fuerte o más suave y **se graba en la toma** (y en el export).
+- El mapa y el estado «activado» se guardan en el navegador; al recargar, MIDI vuelve solo si ya tenía permiso.
+- Coach: la primera vez que tocas suave, explica qué es la *velocity*.
+- Sin MIDI no se pierde nada: en Safari el panel lo explica y, en móvil, el botón ni aparece.
+
+### Compatibilidad con Safari (auditoría)
+- Revisado el código en busca de APIs y sintaxis no soportadas: el build de Vite transpila a Safari 14; hay
+  alternativas para `webkitAudioContext`, `webkitOfflineAudioContext`, `roundRect` y `crypto.randomUUID`.
+- Añadido: alternativas CSS para `dvh` (Safari < 15.4) y `color-mix` (Safari < 16.2).
+- Añadido: **desbloqueo global del audio en el primer toque o tecla** (iOS solo reanuda el audio dentro de un gesto; al
+  recargar y volver directo al proyecto no hay botón «Empezar» de por medio).
+- Añadido: si Safari no admite guardar un `Blob` en IndexedDB, el audio se guarda como bytes.
+- Recomendado: Safari 16.2+ y Chrome 110+. En iPhone, el interruptor de silencio apaga el audio web (avisado en el inicio).
+
+Verificado (`npm test`: 123 tests; build; navegador):
+- Con un controlador MIDI simulado en Chromium: pads por nota de controlador y de teclado, note off sin efecto, MIDI learn
+  (C#3 → Pad C, sin sonar al aprender), mapa General MIDI en batería, desconexión avisada, velocity grabada en la toma
+  (127 → 1,0 · 90 → 0,66 · 50 → 0,33 · 30 → 0,18), y tras recargar MIDI y mapa aprendido siguen activos.
+- Safari simulado (sin Web MIDI): mensaje claro y botón oculto en móvil.
+- Regresión completa de Fases 1–5 en verde; 375 px sin desbordamiento.
+
+Limitaciones conocidas:
+- No se ha podido probar en un Safari o iPhone reales desde este entorno (solo hay Chromium): conviene una prueba manual.
+- Sin modo *gate* (mantener pulsado) ni *aftertouch*; los pads son one-shot.
+- Un solo mapa para todos los controladores conectados.

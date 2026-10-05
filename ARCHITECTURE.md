@@ -45,6 +45,7 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Análisis** | `analysisEngine.js` → `analysisWorker.js` → `dsp.js` | BPM, fase, tonalidad, golpes (transitorios), silencios, energía. Corre en segundo plano al abrir un audio; alimenta «Detectar golpes» y las pistas de corte. |
 | **Onda** | `waveformPeaks.js` | Mono + tabla min/max por bloques de 128 muestras, cacheada por buffer. Dibujar una columna agrega bloques, no muestras. |
 | **Importación** | `audioImport.js` | Formatos garantizados (WAV, MP3) y «si tu navegador puede» (M4A, OGG, FLAC…), límites (60 MB / 10 min), errores traducidos. |
+| **MIDI** | `midiMap.js` + `midiEngine.js` | `midiMap` (puro): mensajes, nombres de nota, velocity → volumen, mapas por defecto (36–51 y teclas blancas desde C3 para chops; General MIDI para batería) y MIDI learn. `midiEngine`: acceso Web MIDI y conexión/desconexión. Opcional: sin MIDI todo funciona con teclado y pantalla. |
 | **Persistencia** | `persistenceEngine.js` + `persistModel.js` | IndexedDB (`projects`, `audio`, `meta`): proyecto como JSON versionado, audio importado como archivo original, último proyecto y pantalla, aprendizaje y preferencias. `persistModel` (puro) decide qué se guarda y cómo se resume. |
 | **Proyecto** | `projectModel.js` | Schema versionado (`schemaVersion: 1`), serialización y migraciones (incluida la de v0.1). |
 | **Práctica** | `demo/practiceSamples.js`, `demo/synth.js`, `assets/practice/` | Catálogo de discos: dos fragmentos reales de piano con licencia libre (WAV de 16 s, se descargan solo al elegirlos) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz). |
@@ -78,6 +79,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 |---|---|---|
 | `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí: autoguardado (el historial no) |
 | `uiStore` | Pantalla, chop seleccionado, herramienta, toasts, «ocupado» | No |
+| `midiStore` | Estado MIDI (activado, dispositivos, último golpe, aprendiendo), mapa nota → pad | El mapa y «activado» (preferencia del equipo) |
 | `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | Solo las preferencias |
 | `learningStore` | Progreso (`findComplete`… `resampleComplete`), misiones saltadas y cerradas, «explorando», mensajes vistos, coach on/off | Sí (global, no por proyecto) |
 
@@ -117,6 +119,12 @@ pagehide · pestaña oculta ─────────────────�
 arranque ─▶ meta (aprendizaje, preferencias) ─▶ ¿estabas dentro de un proyecto?
           └─▶ sí: JSON ─▶ migrateProject ─▶ audio (archivo → decode · disco → síntesis) ─▶ misma pantalla
 ```
+
+## Navegadores
+
+Objetivo: **Chrome** (escritorio y Android) y **Safari** (macOS e iOS), recomendados Chrome 110+ y Safari 16.2+.
+Web MIDI solo en Chrome. Safari: alternativas `webkit*`, CSS sin `dvh`/`color-mix`, audio guardado como bytes si no admite
+`Blob` en IndexedDB y desbloqueo del audio en el primer gesto (`installGestureUnlock`).
 
 ## Rutas
 
