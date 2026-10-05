@@ -36,3 +36,26 @@
 @media (max-width: 760px) {
   .save-text { display: none; }
 }
+
+/* ------------------------------------------------------------ MIDI */
+
+.midi-toggle.is-on-midi { color: var(--active); }
+.midi-panel { display: flex; flex-direction: column; gap: var(--s-3); }
+.midi-panel h3 { font-size: var(--fs-md); font-weight: 800; font-stretch: 108%; }
+.midi-msg { font-size: var(--fs-sm); color: var(--text-2); }
+.midi-devices { list-style: none; display: grid; gap: 4px; font-size: var(--fs-sm); }
+.midi-devices .muted { color: var(--muted); }
+.dot-on { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--active); margin-right: 6px; }
+.midi-activity { padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--bg); font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); }
+.midi-activity.is-live { color: var(--text-2); }
+.midi-activity b { color: var(--active); }
+.midi-map { list-style: none; display: grid; gap: 2px; max-height: 260px; overflow: auto; }
+.midi-map li { display: flex; align-items: center; gap: var(--s-2); min-height: 40px; padding: 0 var(--s-1); border-radius: var(--r-sm); }
+.midi-map li.is-learning { background: var(--select-soft); }
+.midi-map .btn { min-height: 34px; padding: 0 var(--s-3); font-size: var(--fs-xs); }
+.midi-target { width: 64px; font-weight: 700; font-size: var(--fs-sm); }
+.midi-notes { flex: 1; font-family: var(--mono); font-size: var(--fs-xs); color: var(--text-2); }
+
+@media (max-width: 760px) {
+  .midi-toggle.is-unsupported { display: none; }
+}

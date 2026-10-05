@@ -30,7 +30,7 @@ function trigger(id, when, velocity) {
 export function hitDrum(id, velocity = 1) {
   const v = trigger(id, 0, velocity)
   if (!v) return
-  captureHit('drums', id, v.startAt, v.endAt - v.startAt)
+  captureHit('drums', id, v.startAt, v.endAt - v.startAt, velocity)
   if (v.choked) notify({ type: 'drum:choke' })
 }
 

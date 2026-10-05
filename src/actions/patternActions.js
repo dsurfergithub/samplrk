@@ -144,14 +144,14 @@ export function startRecording(kind = 'chops') {
 }
 
 /** Llamado por cada golpe de pad: si se está grabando ESA pista, se anota (sin cuantizar). */
-export function captureHit(kind, padId, when, duration) {
+export function captureHit(kind, padId, when, duration, velocity = 1) {
   if (!isRecording()) return
   const { take, recordedNew } = getRecorder()
   if (!take || take.kind !== kind) return
   const bpm = getBpm()
   const beat = P.beatOfHit(beatAt(when) * P.secondsPerBeat(bpm), bpm, P.lengthBeats(take))
   if (beat === null) return
-  setRecorder({ take: P.addEvent(take, P.createEvent({ padId, beat, bpm, duration })), recordedNew: recordedNew + 1 })
+  setRecorder({ take: P.addEvent(take, P.createEvent({ padId, beat, bpm, duration, velocity })), recordedNew: recordedNew + 1 })
 }
 
 function onRecordEnd(kind) {

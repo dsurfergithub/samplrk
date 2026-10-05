@@ -125,6 +125,12 @@ export function react(event, ctx = {}, seen = new Set()) {
         text: `Has grabado tu primer pattern (${event.count} golpes). SAMPLRK no ha grabado audio: ha anotado qué pad tocaste y cuándo. Por eso, si cambias el pitch de un chop, la toma suena distinta al instante.`,
       })
 
+    case 'midi:soft':
+      return once('learned:velocity', {
+        kind: 'learned', term: 'velocity',
+        text: 'Tu controlador envía la fuerza de cada golpe: más suave, más bajo. Eso se llama velocity, y las tomas la recuerdan.',
+      })
+
     case 'drum:choke':
       return once('learned:choke', {
         kind: 'learned', term: 'choke',

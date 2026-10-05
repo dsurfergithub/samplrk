@@ -16,7 +16,10 @@ import { useEffect } from 'react'
 import { useHistory, useProject, undo, redo } from './state/projectStore'
 import { applyMix } from './actions/mixActions'
 import { bootPersistence } from './actions/projectActions'
+import { installGestureUnlock } from './engines/audioEngine'
 import SaveIndicator from './ui/SaveIndicator'
+import MidiPanel from './ui/MidiPanel'
+import { bootMidi } from './actions/midiActions'
 import { useLearning } from './state/learningStore'
 import { setCoachEnabled } from './actions/learningActions'
 import { goto } from './actions/sampleActions'
@@ -44,7 +47,7 @@ export default function App() {
   useGlobalKeys()
   const mix = useProject(p => p.settings?.mix)
   useEffect(() => { applyMix() }, [mix])
-  useEffect(() => { bootPersistence() }, [])
+  useEffect(() => { installGestureUnlock(); bootPersistence().then(bootMidi) }, [])
 
   if (screen === 'home') return <div className="shell"><Home /><Toast /></div>
 
@@ -58,6 +61,7 @@ export default function App() {
           <SaveIndicator />
           <TransportMini />
           <ProgressPanel />
+          <MidiPanel />
           <button className="btn btn-ghost btn-icon" onClick={undo} disabled={!canUndo} aria-label="Deshacer" title="Deshacer (Ctrl/Cmd+Z)"><Undo2 size={18} /></button>
           <button className="btn btn-ghost btn-icon" onClick={redo} disabled={!canRedo} aria-label="Rehacer" title="Rehacer (Ctrl/Cmd+Shift+Z)"><Redo2 size={18} /></button>
           <button className={`btn btn-ghost btn-icon${coachOn ? '' : ' is-off'}`} onClick={() => setCoachEnabled(!coachOn)}

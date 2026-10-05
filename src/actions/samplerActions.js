@@ -165,7 +165,7 @@ export function hitPad(index, velocity = 1) {
   if (!slice || !buffer) return
   const voice = triggerSlice(buffer, slice, { padKey: index, velocity })
   // después del sonido: grabación (si la hay), selección y coach
-  if (voice) captureHit('chops', index, voice.startAt, voice.endAt - voice.startAt)
+  if (voice) captureHit('chops', index, voice.startAt, voice.endAt - voice.startAt, velocity)
   select(id)
   recordHit(index)
   notify({ type: 'pad:hit', pad: index })
