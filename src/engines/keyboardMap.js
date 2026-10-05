@@ -17,9 +17,15 @@ export const DEFAULT_KEYMAP = [
   'KeyZ', 'KeyX', 'KeyC', 'KeyV',
 ]
 
-/** Etiqueta visible de un code: 'KeyQ' → 'Q', 'Digit1' → '1'. */
+/**
+ * Batería: mano derecha (J K L Ñ) para no chocar nunca con las teclas de chops.
+ * Ver drumKit.DRUM_PADS[].key.
+ */
+
+/** Etiqueta visible de un code: 'KeyQ' → 'Q', 'Digit1' → '1', 'Semicolon' → 'Ñ' (teclado español). */
 export function keyLabel(code) {
   if (!code) return ''
+  if (code === 'Semicolon') return 'Ñ'
   if (code.startsWith('Key')) return code.slice(3)
   if (code.startsWith('Digit')) return code.slice(5)
   return code

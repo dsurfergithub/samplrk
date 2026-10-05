@@ -10,6 +10,11 @@ import { emptyPads, padsInTimeOrder, CHOP_COLORS } from './sliceModel'
 
 export const SCHEMA_VERSION = 1
 
+/** Volúmenes de la mezcla sencilla: sample (chops), batería y general. */
+export function defaultMix() { return { chops: 1, drums: 0.9, master: 0.8 } }
+
+export function mixOf(project) { return { ...defaultMix(), ...(project.settings?.mix ?? {}) } }
+
 export function createPadBank(name = 'Banco A') {
   return { id: makeId('bank'), name, pads: emptyPads() }
 }
@@ -28,7 +33,7 @@ export function createProject({ name = 'Mi primer beat', mode = 'learning' } = {
     padBanks: [createPadBank()],
     patterns: [],
     drumKit: null,
-    settings: { keymap: 'default' },
+    settings: { keymap: 'default', mix: defaultMix() },
   }
 }
 

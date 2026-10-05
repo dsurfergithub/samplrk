@@ -39,7 +39,11 @@ export function getSequencerSnapshot() { return snapshot }
  * Arranca. Opciones:
  *  bpm, lengthBeats, countInBeats (0 = sin cuenta atrás),
  *  record (bool), metronome (bool),
- *  getEvents() → eventos a reproducir (se consulta en cada tick: el quantize cambia en vivo),
+ *  getEvents() → eventos a reproducir (se consulta en cada tick: el quantize cambia en vivo);
+ *               al grabar, son los de la toma y empiezan a sonar tras ella,
+ *  getBacking() → [{ events, until? }] pistas que suenan desde el "1" incluso
+ *               mientras grabas (p. ej. tus chops al grabar batería);
+ *               `until` = beat absoluto a partir del cual esa pista calla,
  *  onEvent(event, when) → dispara el sonido,
  *  onRecordEnd() → al terminar la toma.
  */
@@ -76,6 +80,11 @@ function tick() {
     const events = S.getEvents()
     for (const { event, at } of eventsInWindow(events, S.lengthBeats, Math.max(0, from), horizon, S.playFrom)) {
       S.onEvent(event, S.origin + at * S.spb)
+    }
+    for (const track of S.getBacking?.() ?? []) {
+      for (const { event, at } of eventsInWindow(track.events, S.lengthBeats, Math.max(0, from), horizon, 0)) {
+        if (track.until === undefined || at < track.until) S.onEvent(event, S.origin + at * S.spb)
+      }
     }
     S.scheduledTo = horizon
   }
