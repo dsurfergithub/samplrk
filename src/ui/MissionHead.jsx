@@ -107,7 +107,7 @@ function Success({ done, hasNext }) {
         </button>
         <button className="btn btn-ghost" onClick={stayAndExplore}>Quedarme aquí y experimentar</button>
       </div>
-      {!hasNext && <p className="screen-sub">Has completado lo básico del sampling. Muy pronto: batería y tu primer beat.</p>}
+      {!hasNext && <p className="screen-sub">Has completado lo básico del sampling. Ahora el sampler es tuyo: cambia, vuelve a grabar, experimenta.</p>}
     </header>
   )
 }

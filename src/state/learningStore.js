@@ -7,7 +7,7 @@ import { createStore } from './createStore'
 export const PROGRESS_KEYS = [
   'findComplete', 'cutComplete', 'loopComplete', 'chopComplete', 'playComplete',
   'reorderComplete', 'recordComplete', 'flipComplete', 'pitchComplete', 'reverseComplete',
-  'drumsComplete', 'resampleComplete',
+  'drumsComplete', 'beatComplete', 'resampleComplete',
 ]
 
 export const emptyProgress = () => Object.fromEntries(PROGRESS_KEYS.map(k => [k, false]))

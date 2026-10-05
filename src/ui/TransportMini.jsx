@@ -9,11 +9,11 @@ import { togglePlay } from '../actions/patternActions'
 import { useSequencerPhase } from './hooks'
 
 export default function TransportMini() {
-  const saved = useProject(p => p.patterns[0])
+  const patterns = useProject(p => p.patterns)
   const take = useRecorder(s => s.take)
   const phase = useSequencerPhase()
-  const pattern = take ?? saved
-  if (!pattern?.events.length && phase === 'idle') return null
+  const hasEvents = !!take?.events.length || patterns.some(x => x.events.length)
+  if (!hasEvents && phase === 'idle') return null
   const rec = phase === 'countin' || phase === 'recording'
   return (
     <button className={`btn btn-ghost btn-icon transport-mini${rec ? ' is-rec' : phase === 'playing' ? ' is-playing' : ''}`}

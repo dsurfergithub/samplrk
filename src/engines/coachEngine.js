@@ -49,6 +49,7 @@ export function flipKind(event, ctx = {}) {
     return classifyPhrase(lastPhrase(ctx.hits ?? []), ctx.order ?? []) === 'flip' ? 'reorder' : null
   }
   if (event.type === 'record:done') {
+    if (event.kind === 'drums') return null
     return classifyPhrase(event.sequence ?? [], ctx.order ?? []) === 'flip' ? 'reorder' : null
   }
   if (event.type === 'pitch:changed' && event.semitones) return 'pitch'
@@ -122,6 +123,12 @@ export function react(event, ctx = {}, seen = new Set()) {
       return once('learned:pattern', {
         kind: 'learned', term: 'pattern',
         text: `Has grabado tu primer pattern (${event.count} golpes). SAMPLRK no ha grabado audio: ha anotado qué pad tocaste y cuándo. Por eso, si cambias el pitch de un chop, la toma suena distinta al instante.`,
+      })
+
+    case 'drum:choke':
+      return once('learned:choke', {
+        kind: 'learned', term: 'choke',
+        text: '¿Has notado que el charles cerrado corta al abierto? Eso se llama choke: como en una batería de verdad, cerrar el charles apaga su sonido.',
       })
 
     case 'record:empty':

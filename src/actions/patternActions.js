@@ -1,5 +1,9 @@
 /**
- * patternActions.js — RECORD: grabar lo que tocas, repetirlo, ajustarlo.
+ * patternActions.js — RECORD y DRUMS: grabar lo que tocas, repetirlo, ajustarlo.
+ *
+ * Dos pistas con la misma duración: 'chops' (pads del sample) y 'drums'
+ * (batería). Mientras grabas una, la otra suena de fondo. La batería se graba
+ * sumando a lo que ya había (como en una MPC); los chops sustituyen la toma.
  * La grabación guarda eventos (pad + tiempo), nunca audio. Nada se cuantiza
  * mientras tocas: el ajuste a la rejilla es opcional y no destructivo.
  */
@@ -10,7 +14,11 @@ import { stopPreview } from '../engines/audioEngine'
 import { commit, getProject } from '../state/projectStore'
 import { getRecorder, setRecorder } from '../state/recorderStore'
 import { getActiveSample, getActiveBuffer } from './sampleActions'
+import { playDrum } from './drumActions'
 import { notify } from './learningActions'
+
+export const TRACKS = ['chops', 'drums']
+const other = (kind) => (kind === 'drums' ? 'chops' : 'drums')
 
 // ---------------------------------------------------------------- tempo
 
@@ -41,14 +49,40 @@ export function tap() {
   return bpm
 }
 
-// ---------------------------------------------------------------- reproducir
+// ---------------------------------------------------------------- pistas
 
-/** Lo que suena ahora: la toma pendiente o el pattern guardado. */
-export function currentPattern() {
-  return getRecorder().take ?? getProject().patterns[0] ?? null
+/** Pattern guardado de una pista (los de la v1 sin `kind` son de chops). */
+export function getPattern(kind, p = getProject()) {
+  return p.patterns.find(x => (x.kind ?? 'chops') === kind) ?? null
 }
 
+/** Lo que suena ahora en una pista: la toma pendiente o el pattern guardado. */
+export function currentPattern(kind = 'chops') {
+  const take = getRecorder().take
+  return take?.kind === kind ? take : getPattern(kind)
+}
+
+/** Compases fijados por la otra pista (todas duran lo mismo), o null. */
+export function lockedBars(kind) {
+  const o = currentPattern(other(kind))
+  return o?.events.length ? o.bars : null
+}
+
+const tagged = (kind, pattern) => (pattern ? P.effectiveEvents(pattern).map(e => ({ ...e, kind })) : [])
+
+function allEvents() {
+  return TRACKS.flatMap(k => tagged(k, currentPattern(k)))
+}
+
+function beatLength() {
+  const lens = TRACKS.map(k => currentPattern(k)).filter(x => x?.events.length).map(P.lengthBeats)
+  return lens.length ? Math.max(...lens) : null
+}
+
+// ---------------------------------------------------------------- reproducir
+
 function playEvent(event, when) {
+  if (event.kind === 'drums') { playDrum(event.padId, when, event.velocity); return }
   const p = getProject()
   const sliceId = p.padBanks[0].pads[event.padId]
   const slice = sliceId && p.slices.find(s => s.id === sliceId)
@@ -56,24 +90,17 @@ function playEvent(event, when) {
   if (slice && buffer) triggerSlice(buffer, slice, { padKey: event.padId, when, velocity: event.velocity })
 }
 
-function sequencerOptions(pattern, extra = {}) {
-  const r = getRecorder()
-  return {
-    bpm: getBpm(),
-    lengthBeats: P.lengthBeats(pattern),
-    metronome: r.metronome,
-    getEvents: () => { const cp = currentPattern(); return cp ? P.effectiveEvents(cp) : [] },
-    onEvent: playEvent,
-    ...extra,
-  }
-}
+export function hasBeat() { return beatLength() !== null }
 
 export function playPattern() {
-  const pattern = currentPattern()
-  if (!pattern || !pattern.events.length) return
+  const len = beatLength()
+  if (!len) return
   stopPreview()
   ensureBpm()
-  startSequencer(sequencerOptions(pattern))
+  startSequencer({
+    bpm: getBpm(), lengthBeats: len, metronome: getRecorder().metronome,
+    getEvents: allEvents, onEvent: playEvent,
+  })
 }
 
 export function stopPattern() { stopSequencer() }
@@ -84,53 +111,74 @@ export function togglePlay() {
 
 // ---------------------------------------------------------------- grabar
 
-export function startRecording() {
+let preEvents = [] // batería: lo que ya había antes de esta toma (suena de fondo solo durante la grabación)
+
+export function startRecording(kind = 'chops') {
   stopPreview()
   const bpm = ensureBpm()
   const r = getRecorder()
-  const take = P.createPattern({ bars: r.bars, bpm, name: 'Toma' })
-  setRecorder({ take })
-  startSequencer(sequencerOptions(take, {
+  const bars = lockedBars(kind) ?? r.bars
+  const take = { ...P.createPattern({ bars, bpm, name: 'Toma' }), kind }
+  const saved = getPattern(kind)
+  if (kind === 'drums' && saved && saved.bars === bars) {
+    // la batería se graba encima de lo que ya hay
+    take.events = [...saved.events]
+    take.quantize = saved.quantize
+  }
+  preEvents = take.events
+  setRecorder({ take, recordedNew: 0 })
+  const len = P.lengthBeats(take)
+  startSequencer({
+    bpm, lengthBeats: len, metronome: r.metronome,
     record: true,
     countInBeats: r.countIn ? P.BEATS_PER_BAR : 0,
-    onRecordEnd,
-  }))
+    getEvents: () => tagged(kind, currentPattern(kind)),
+    getBacking: () => {
+      const tracks = [{ events: tagged(other(kind), currentPattern(other(kind))) }]
+      if (preEvents.length) tracks.push({ events: tagged(kind, { ...take, events: preEvents }), until: len })
+      return tracks
+    },
+    onEvent: playEvent,
+    onRecordEnd: () => onRecordEnd(kind),
+  })
 }
 
-/** Llamado por cada golpe de pad: si se está grabando, se anota (sin cuantizar). */
-export function captureHit(padId, when, duration) {
+/** Llamado por cada golpe de pad: si se está grabando ESA pista, se anota (sin cuantizar). */
+export function captureHit(kind, padId, when, duration) {
   if (!isRecording()) return
-  const take = getRecorder().take
-  if (!take) return
+  const { take, recordedNew } = getRecorder()
+  if (!take || take.kind !== kind) return
   const bpm = getBpm()
   const beat = P.beatOfHit(beatAt(when) * P.secondsPerBeat(bpm), bpm, P.lengthBeats(take))
   if (beat === null) return
-  setRecorder({ take: P.addEvent(take, P.createEvent({ padId, beat, bpm, duration })) })
+  setRecorder({ take: P.addEvent(take, P.createEvent({ padId, beat, bpm, duration })), recordedNew: recordedNew + 1 })
 }
 
-function onRecordEnd() {
-  const take = getRecorder().take
-  if (!take?.events.length) {
+function onRecordEnd(kind) {
+  const { take, recordedNew } = getRecorder()
+  if (!take || !recordedNew) {
     stopSequencer()
     setRecorder({ take: null })
-    notify({ type: 'record:empty' })
+    notify({ type: 'record:empty', kind })
     return
   }
-  notify({ type: 'record:done', count: take.events.length, sequence: P.padSequence(take) })
+  notify({ type: 'record:done', kind, count: recordedNew, sequence: P.padSequence(take) })
 }
 
 /** «Quedármela»: la toma pasa al proyecto (se puede deshacer). Sigue sonando. */
 export function keepTake() {
   const take = getRecorder().take
   if (!take) return
-  commit(q => ({ ...q, patterns: [{ ...take, name: 'Pattern 1' }] }))
+  const name = take.kind === 'drums' ? 'Batería' : 'Chops'
+  commit(q => ({ ...q, patterns: [...q.patterns.filter(x => (x.kind ?? 'chops') !== take.kind), { ...take, name }] }))
   setRecorder({ take: null })
 }
 
-/** «Otra toma»: descarta y vuelve a grabar. */
+/** «Otra toma»: descarta y vuelve a grabar la misma pista. */
 export function retryTake() {
+  const kind = getRecorder().take?.kind ?? 'chops'
   setRecorder({ take: null })
-  startRecording()
+  startRecording(kind)
 }
 
 export function discardTake() {
@@ -138,19 +186,21 @@ export function discardTake() {
   setRecorder({ take: null })
 }
 
-export function clearPattern() {
+export function clearPattern(kind = 'chops') {
   stopSequencer()
-  commit(q => (q.patterns.length ? { ...q, patterns: [] } : null))
+  commit(q => (getPattern(kind, q) ? { ...q, patterns: q.patterns.filter(x => (x.kind ?? 'chops') !== kind) } : null))
 }
 
 // ---------------------------------------------------------------- ajustes
 
-export function setQuantize(q) {
+export function setQuantize(kind, q) {
   const r = getRecorder()
-  const before = currentPattern()?.quantize ?? 'off'
+  const before = currentPattern(kind)?.quantize ?? 'off'
   if (before === q) return
-  if (r.take) setRecorder({ take: { ...r.take, quantize: q } })
-  else commit(p => p.patterns.length ? { ...p, patterns: p.patterns.map((x, i) => i === 0 ? { ...x, quantize: q } : x) } : null)
+  if (r.take?.kind === kind) setRecorder({ take: { ...r.take, quantize: q } })
+  else commit(p => getPattern(kind, p)
+    ? { ...p, patterns: p.patterns.map(x => ((x.kind ?? 'chops') === kind ? { ...x, quantize: q } : x)) }
+    : null)
   if (q !== 'off') { setRecorder({ usedQuantize: true }); notify({ type: 'quantize:on', grid: q }) }
   else if (r.usedQuantize) notify({ type: 'quantize:off' })
 }

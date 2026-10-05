@@ -1,0 +1,62 @@
+/* drums.css — pads de batería, pistas, mezcla y pantalla del beat */
+
+/* ------------------------------------------------------------ batería: pads bajos y anchos, distintos de los chops */
+
+.drum-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-4); user-select: none; -webkit-user-select: none; }
+.drum-pad {
+  aspect-ratio: auto; min-height: 112px; justify-content: center; align-items: flex-start;
+  background: linear-gradient(180deg, #1d1f23 0%, #16181b 100%);
+  border-radius: 18px;
+}
+.drum-pad::before { height: 100%; width: 4px; right: auto; bottom: 0; }
+.drum-pad .pad-key { top: var(--s-2); right: var(--s-2); }
+.drum-name { font-size: clamp(16px, 2.6vw, 22px); font-weight: 800; font-stretch: 118%; letter-spacing: 0.04em; text-transform: uppercase; }
+.drum-label { font-size: var(--fs-sm); color: var(--text-2); }
+.drum-pad:disabled { opacity: 0.4; cursor: wait; }
+
+/* ------------------------------------------------------------ pistas */
+
+.lanes { display: grid; gap: var(--s-2); margin-bottom: var(--s-4); }
+.lanes .lane { margin-bottom: 0; }
+.lane-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); margin-bottom: 4px; }
+.lane.is-dim .lane-track { opacity: 0.55; }
+.lane.is-dim .lane-title { color: var(--muted); }
+
+/* ------------------------------------------------------------ mezcla */
+
+.mix {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4);
+  padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4);
+  border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line);
+}
+.mix .insp-label { display: inline-flex; align-items: center; gap: 6px; }
+.mix-ch { display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-sm); color: var(--text-2); }
+.mix-ch input { width: 120px; accent-color: var(--active); }
+
+/* ------------------------------------------------------------ beat */
+
+.beat-hero {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s-5); align-items: center;
+  padding: var(--s-5); margin-bottom: var(--s-4);
+  border-radius: var(--r-lg); background: var(--panel); border: 1px solid var(--line);
+}
+.beat-play { width: 112px; height: 112px; color: var(--active); border-color: color-mix(in srgb, var(--active) 40%, var(--line)); }
+.beat-play.is-on { background: var(--active-soft); }
+.beat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s-3) var(--s-4); }
+.beat-stats dt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.beat-stats dd { font-size: var(--fs-lg); font-weight: 700; margin-top: 2px; }
+.beat-stats dd small { font-size: var(--fs-sm); font-weight: 400; color: var(--text-2); }
+.beat-list { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: var(--fs-sm) !important; font-weight: 500 !important; color: var(--text-2); }
+.export-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
+.beat-more { margin-top: var(--s-2); }
+.confirm-new { font-size: var(--fs-sm); color: var(--text-2); }
+
+@media (max-width: 640px) {
+  .drum-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+  .drum-pad { min-height: 88px; }
+  .beat-hero { grid-template-columns: 1fr; justify-items: center; padding: var(--s-4); }
+  .beat-stats { width: 100%; grid-template-columns: 1fr 1fr; }
+  .export-bar .btn-primary { width: 100%; }
+  .mix-ch { width: 100%; justify-content: space-between; }
+  .mix-ch input { flex: 1; max-width: 220px; }
+}

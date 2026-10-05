@@ -79,6 +79,19 @@ export const MISSIONS = [
     sub: 'Activa «Reverse» en un pad y escucha cómo suena de atrás hacia delante.',
     success: 'Pitch, reverse, cambiar el orden: todo eso es transformar el sample.',
   },
+  {
+    id: 'drums', step: 'Drums', screens: ['drums'], done: p => p.drumsComplete,
+    title: 'Vamos a darle ritmo.',
+    sub: 'Tu pattern sonará de fondo. Graba batería encima con J (bombo), K (caja) y L (charles). Por ejemplo: bombo en el 1 y el 3, caja en el 2 y el 4.',
+    success: 'Has añadido batería: ahora tu frase tiene ritmo.',
+    fact: 'En el hip hop clásico la batería también se sampleaba: los productores troceaban «breaks», los momentos de un disco en que solo suena la batería.',
+  },
+  {
+    id: 'beat', step: 'Beat', screens: ['beat'], done: p => p.beatComplete,
+    title: 'Escucha tu primer beat.',
+    sub: 'Dale al play. Si te gusta, expórtalo como WAV para llevártelo.',
+    success: 'Este es tu primer beat. Lo has hecho tú, trozo a trozo.',
+  },
 ]
 
 /**
@@ -89,7 +102,6 @@ export const COVERED_MESSAGES = new Set(MISSIONS.flatMap(m => m.covers ?? []))
 
 /** Misiones futuras: se ven en la lista de progreso, todavía no se pueden hacer. */
 export const UPCOMING = [
-  { id: 'drums', label: 'Añadir batería' },
   { id: 'resample', label: 'Resamplear' },
 ]
 
@@ -97,6 +109,7 @@ export const CHECKLIST_LABELS = {
   find: 'Encontrar un momento', loop: 'Crear un loop', cut: 'Cortar un sample',
   chop: 'Crear chops', play: 'Tocar los pads', reorder: 'Hacer un flip (cambiar el orden)',
   record: 'Grabar un pattern', pitch: 'Cambiar el pitch', reverse: 'Usar reverse',
+  drums: 'Añadir batería', beat: 'Escuchar tu primer beat',
 }
 
 export const isDone = (m, progress, skipped = []) => !!m.done(progress) || skipped.includes(m.id)

@@ -4,6 +4,8 @@ import { activeVoices } from '../engines/samplerEngine'
 import { shouldIgnoreKey, padForCode } from '../engines/keyboardMap'
 import { hitPad } from '../actions/samplerActions'
 import { togglePlay } from '../actions/patternActions'
+import { hitDrum } from '../actions/drumActions'
+import { drumForCode } from '../engines/drumKit'
 import { subscribeSequencer, getSequencerSnapshot } from '../engines/sequencer'
 import { undo, redo } from '../state/projectStore'
 import { getUi } from '../state/uiStore'
@@ -40,9 +42,15 @@ export function useGlobalKeys() {
       }
       if (mod && ev.code === 'KeyY' && !isTyping(ev)) { ev.preventDefault(); redo(); return }
       const screen = getUi().screen
-      if (screen !== 'chop' && screen !== 'record') return
-      if (ev.code === 'Space' && ev.target === document.body && screen === 'record') { ev.preventDefault(); togglePlay(); return }
+      if (!['chop', 'record', 'drums', 'beat'].includes(screen)) return
+      if (ev.code === 'Space' && ev.target === document.body && screen !== 'chop') { ev.preventDefault(); togglePlay(); return }
       if (ev.repeat || shouldIgnoreKey(ev)) return
+      if (screen === 'drums') {
+        const d = drumForCode(ev.code)
+        if (d) { ev.preventDefault(); hitDrum(d.id) }
+        return
+      }
+      if (screen === 'beat') return
       const i = padForCode(ev.code)
       if (i >= 0) { ev.preventDefault(); hitPad(i) }
     }

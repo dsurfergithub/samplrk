@@ -8,9 +8,12 @@ import './styles/screens.css'
 import './styles/pads.css'
 import './styles/record.css'
 import './styles/learning.css'
+import './styles/drums.css'
 import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
 import { useUi } from './state/uiStore'
-import { useHistory, undo, redo } from './state/projectStore'
+import { useEffect } from 'react'
+import { useHistory, useProject, undo, redo } from './state/projectStore'
+import { applyMix } from './actions/mixActions'
 import { useLearning } from './state/learningStore'
 import { setCoachEnabled } from './actions/learningActions'
 import { goto } from './actions/sampleActions'
@@ -20,13 +23,15 @@ import SourcePicker from './ui/SourcePicker'
 import CutLab from './ui/CutLab'
 import ChopLab from './ui/ChopLab'
 import RecordLab from './ui/RecordLab'
+import BeatResult from './ui/BeatResult'
 import TransportMini from './ui/TransportMini'
 import ProgressPanel from './ui/ProgressPanel'
 import StepBar from './ui/StepBar'
 import Toast from './ui/Toast'
 import AudioGate from './ui/AudioGate'
 
-const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab, record: RecordLab }
+const DrumsScreen = () => <RecordLab track="drums" />
+const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab, record: RecordLab, drums: DrumsScreen, beat: BeatResult }
 
 export default function App() {
   const screen = useUi(s => s.screen)
@@ -34,6 +39,8 @@ export default function App() {
   const canRedo = useHistory(h => h.future.length > 0)
   const coachOn = useLearning(s => s.coachEnabled)
   useGlobalKeys()
+  const mix = useProject(p => p.settings?.mix)
+  useEffect(() => { applyMix() }, [mix])
 
   if (screen === 'home') return <div className="shell"><Home /><Toast /></div>
 

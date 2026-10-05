@@ -15,10 +15,11 @@ const STEPS = [
   { id: 'play', label: 'Play', screen: 'chop', done: 'playComplete', needs: 'sample' },
   { id: 'record', label: 'Record', screen: 'record', done: 'recordComplete', needs: 'sample' },
   { id: 'flip', label: 'Flip', screen: 'chop', done: 'flipComplete', needs: 'sample' },
-  { id: 'drums', label: 'Drums' },
+  { id: 'drums', label: 'Drums', screen: 'drums', done: 'drumsComplete', needs: 'sample' },
+  { id: 'beat', label: 'Beat', screen: 'beat', done: 'beatComplete', needs: 'sample' },
 ]
 
-const CURRENT = { source: 'find', cut: 'cut', chop: 'chop', record: 'record' }
+const CURRENT = { source: 'find', cut: 'cut', chop: 'chop', record: 'record', drums: 'drums', beat: 'beat' }
 
 export default function StepBar() {
   const screen = useUi(s => s.screen)

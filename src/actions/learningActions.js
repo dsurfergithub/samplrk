@@ -26,7 +26,8 @@ const PROGRESS_BY_EVENT = {
   'chops:created': ['chopComplete'],
   'pitch:changed': ['pitchComplete'],
   'reverse:on': ['reverseComplete'],
-  'record:done': ['recordComplete'],
+  'beat:played': ['beatComplete'],
+  'beat:exported': ['beatComplete'],
 }
 
 /** Golpes seguidos que cuentan como «has tocado los pads». */
@@ -38,6 +39,7 @@ export function notify(event) {
   // el progreso no depende de que el coach esté encendido
   for (const k of PROGRESS_BY_EVENT[event.type] ?? []) markProgress(k)
   if (event.type === 'pad:hit' && hits.length >= PLAY_HITS) markProgress('playComplete')
+  if (event.type === 'record:done') markProgress(event.kind === 'drums' ? 'drumsComplete' : 'recordComplete')
   const flip = flipKind(event, ctx)
   if (flip) markProgress('flipComplete')
   if (flip === 'reorder') markProgress('reorderComplete')

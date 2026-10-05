@@ -6,7 +6,8 @@
 import { createStore } from './createStore'
 
 const store = createStore({
-  take: null,          // Pattern recién grabado, pendiente de «Quedármela / Otra toma»
+  take: null,          // Pattern recién grabado (con `kind`), pendiente de «Quedármela / Otra toma»
+  recordedNew: 0,      // golpes nuevos en la toma en curso (la batería suma sobre lo anterior)
   bars: 2,             // compases a grabar
   countIn: true,       // cuenta atrás de un compás
   metronome: false,    // opcional: nunca se impone

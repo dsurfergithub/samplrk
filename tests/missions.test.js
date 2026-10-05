@@ -19,7 +19,7 @@ describe('misiones', () => {
 
   it('al terminar todas no hay misión actual', () => {
     const all = P(['findComplete', 'loopComplete', 'cutComplete', 'chopComplete', 'playComplete',
-      'reorderComplete', 'recordComplete', 'pitchComplete', 'reverseComplete'])
+      'reorderComplete', 'recordComplete', 'pitchComplete', 'reverseComplete', 'drumsComplete', 'beatComplete'])
     expect(currentMission(all)).toBeNull()
   })
 
@@ -52,7 +52,8 @@ describe('misiones', () => {
     const list = checklist(P(['findComplete']), ['loop'])
     expect(list[0]).toMatchObject({ id: 'find', done: true })
     expect(list[1]).toMatchObject({ id: 'loop', done: false, skipped: true })
-    expect(list.find(x => x.id === 'drums').upcoming).toBe(true)
+    expect(list.find(x => x.id === 'drums').upcoming).toBeFalsy()
+    expect(list.find(x => x.id === 'resample').upcoming).toBe(true)
     for (const x of list) expect(Object.keys(x)).not.toContain('score')
   })
 })
