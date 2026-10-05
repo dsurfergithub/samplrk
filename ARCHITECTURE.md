@@ -45,6 +45,7 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Análisis** | `analysisEngine.js` → `analysisWorker.js` → `dsp.js` | BPM, fase, tonalidad, golpes (transitorios), silencios, energía. Corre en segundo plano al abrir un audio; alimenta «Detectar golpes» y las pistas de corte. |
 | **Onda** | `waveformPeaks.js` | Mono + tabla min/max por bloques de 128 muestras, cacheada por buffer. Dibujar una columna agrega bloques, no muestras. |
 | **Importación** | `audioImport.js` | Formatos garantizados (WAV, MP3) y «si tu navegador puede» (M4A, OGG, FLAC…), límites (60 MB / 10 min), errores traducidos. |
+| **Persistencia** | `persistenceEngine.js` + `persistModel.js` | IndexedDB (`projects`, `audio`, `meta`): proyecto como JSON versionado, audio importado como archivo original, último proyecto y pantalla, aprendizaje y preferencias. `persistModel` (puro) decide qué se guarda y cómo se resume. |
 | **Proyecto** | `projectModel.js` | Schema versionado (`schemaVersion: 1`), serialización y migraciones (incluida la de v0.1). |
 | **Práctica** | `demo/practiceSamples.js`, `demo/synth.js`, `assets/practice/` | Catálogo de discos: dos fragmentos reales de piano con licencia libre (WAV de 16 s, se descargan solo al elegirlos) y cuatro grabaciones sintetizadas en el navegador (Soul, Funk, Jazz, Voz). |
 | Export / Loops / Escenas / Timeline | `exportEngine.js`, `loopEngine.js`, `projectEngine.js`, `timelineEngine.js`, `library.js`, `aiAssistant.js` | Sin cambios. Usados por `#/legacy`; volverán en el modo avanzado. |
@@ -75,10 +76,10 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 
 | Store | Contenido | Persistente |
 |---|---|---|
-| `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí (Fase 5) |
+| `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí: autoguardado (el historial no) |
 | `uiStore` | Pantalla, chop seleccionado, herramienta, toasts, «ocupado» | No |
-| `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | No |
-| `learningStore` | Progreso (`findComplete`… `resampleComplete`), misiones saltadas y cerradas, «explorando», mensajes vistos, coach on/off | Sí (Fase 5) |
+| `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | Solo las preferencias |
+| `learningStore` | Progreso (`findComplete`… `resampleComplete`), misiones saltadas y cerradas, «explorando», mensajes vistos, coach on/off | Sí (global, no por proyecto) |
 
 `createStore()` es el mismo patrón `useSyncExternalStore` de v0.1, sin dependencias.
 
@@ -104,6 +105,18 @@ lo que la misión ya explica. En Libre, cabeceras normales, todo visible y coach
 Los pads suenan en `pointerdown`; el teclado usa `click` (Enter/Espacio con foco) y el mapa global de teclas.
 
 Estilos: `styles/tokens.css` (design system), `base.css`, `screens.css`, `pads.css`. Sin estilos inline salvo valores dinámicos (color de chop, anchuras).
+
+## Persistencia
+
+```
+cambio en projectStore ──▶ «Guardando…» ──400 ms──▶ IndexedDB.projects  (JSON + resumen)
+importar archivo ─────────────────────────────────▶ IndexedDB.audio     (File original)
+cambio de pantalla / aprendizaje / preferencias ──▶ IndexedDB.meta
+pagehide · pestaña oculta ─────────────────────────▶ guardado inmediato
+
+arranque ─▶ meta (aprendizaje, preferencias) ─▶ ¿estabas dentro de un proyecto?
+          └─▶ sí: JSON ─▶ migrateProject ─▶ audio (archivo → decode · disco → síntesis) ─▶ misma pantalla
+```
 
 ## Rutas
 

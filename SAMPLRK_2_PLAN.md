@@ -421,3 +421,46 @@ Limitaciones conocidas:
 - Un solo kit; sin ajustes por pieza en la interfaz (el modelo `drumKit.pads` ya guarda volumen y pitch por pieza).
 - Sin swing ni humanización (prevista: «groove»).
 - Sin persistencia: el beat se pierde al recargar (Fase 5). La pantalla lo avisa al «Crear otro».
+
+---
+
+## 13. Fase 5 — Persistencia local (cerrada)
+
+**Objetivo:** que nada se pierda al recargar. Local-first: IndexedDB, sin backend, sin cuentas, sin dependencias nuevas.
+
+Implementado:
+- `persistenceEngine.js`: envoltorio mínimo de IndexedDB con tres almacenes — `projects` (JSON versionado + resumen),
+  `audio` (el **archivo original** importado, nunca un AudioBuffer) y `meta` (último proyecto, pantalla por proyecto,
+  aprendizaje, preferencias). Errores traducidos (modo privado, sin espacio). Pide almacenamiento persistente al navegador.
+- `persistModel.js` (puro): qué se guarda, resumen para la lista, nombre por defecto («Beat con «…»»), instantánea y
+  restauración del aprendizaje (tolerante a datos corruptos y a claves nuevas).
+- **Discos de práctica**: no se guardan; se regeneran idénticos al abrir (son deterministas).
+- **Autoguardado** (`projectActions.js`): cada cambio marca «Guardando…» al momento y se guarda a los 400 ms; al salir de la
+  página o pasar a segundo plano se guarda ya. Los cambios de pantalla se guardan al instante (deciden dónde vuelves).
+  Indicador discreto «Guardado ✓» / «Guardando…» / «Sin guardar» / «No se guarda» en la barra superior.
+- **Recuperación**: al recargar, si estabas dentro de un proyecto, vuelves **a la misma pantalla** con todo (chops, pitch,
+  patterns, batería, mezcla, tempo). El audio se reconstruye (archivo → `decodeAudioData`; disco → síntesis).
+- **Mis proyectos** en el inicio: «Continuar» el último, abrir, renombrar y borrar (con confirmación; borra también su audio).
+  «Empezar uno nuevo» crea un proyecto limpio sin tocar el anterior.
+- Se guardan también el progreso de aprendizaje, el coach on/off y las preferencias de grabación (compases, cuenta atrás,
+  metrónomo y su volumen).
+- La pantalla «Tu primer beat» ya no avisa de pérdida: «Este beat queda guardado en Mis proyectos».
+
+Corregido durante la fase (lo detectó el test de recarga):
+- Un cambio hecho justo antes de recargar podía perderse porque el indicador seguía mostrando el «Guardado» anterior.
+  Ahora el estado pendiente es visible y el retardo es menor.
+- «Empezar uno nuevo» cambiaba el modo del proyecto anterior. Ahora crea uno limpio.
+- En móvil, un nombre de proyecto largo empujaba los botones fuera de la pantalla.
+
+Verificado (`npm test`: 114 tests; build; navegador a 1280 px y 375 px) — el test de persistencia del brief (§91):
+- Disco de práctica → 8 chops → pitch −3 → pattern → batería → **recarga** → vuelve a DRUMS con las dos pistas (4/4 golpes),
+  pitch −3, progreso 8/11 y los pads suenan.
+- WAV importado → 4 chops → **recarga** → 4 pads que suenan (audio reconstruido desde el archivo guardado).
+- Mis proyectos: 2 proyectos, «Continuar» el más reciente, renombrar, reabrir, borrar y recargar → 1.
+- Regresión completa de Fases 1–4 en verde.
+
+Limitaciones conocidas:
+- Los datos viven en este navegador: borrar los datos del sitio o el modo privado los elimina. Exportar WAV sigue siendo
+  la forma de llevarse el beat. (Exportar/importar el proyecto como archivo: posible mejora futura.)
+- La toma pendiente («¿Te la quedas?») no se guarda hasta decidir; el historial de deshacer no sobrevive a recargar.
+- No hay sincronización entre pestañas: si abres SAMPLRK en dos a la vez, gana la última que guarda.
