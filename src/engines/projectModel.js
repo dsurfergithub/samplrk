@@ -38,8 +38,8 @@ export function createProject({ name = 'Mi primer beat', mode = 'learning' } = {
 }
 
 /** Copia serializable (descarta cualquier campo runtime que se haya colado). */
-export function serializeProject(project) {
-  return JSON.stringify({ ...project, updatedAt: new Date().toISOString() })
+export function serializeProject(project, now = new Date().toISOString()) {
+  return JSON.stringify({ ...project, updatedAt: now })
 }
 
 /**
