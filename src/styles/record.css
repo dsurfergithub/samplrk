@@ -61,7 +61,7 @@
 /* ------------------------------------------------------------ transporte */
 
 .rec-transport { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-bottom: var(--s-4); }
-.btn-rec { color: var(--rec); border-color: color-mix(in srgb, var(--rec) 45%, var(--line)); }
+.btn-rec { color: var(--rec); border-color: rgba(255, 75, 75, 0.5); border-color: color-mix(in srgb, var(--rec) 45%, var(--line)); }
 .btn-rec:hover { background: color-mix(in srgb, var(--rec) 12%, var(--panel-2)); border-color: var(--rec); }
 .btn-rec.is-live { background: var(--rec); color: #fff; border-color: var(--rec); animation: recPulse 1s ease-in-out infinite; }
 @keyframes recPulse { 50% { box-shadow: 0 0 0 6px rgba(255, 75, 75, 0.18); } }

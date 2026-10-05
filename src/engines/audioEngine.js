@@ -80,6 +80,23 @@ export async function unlockAudio() {
   return c.state
 }
 
+/**
+ * Red de seguridad para iOS/Safari: si el contexto está suspendido (por
+ * ejemplo tras recargar y volver directo al proyecto, sin pulsar «Empezar»),
+ * el primer toque o tecla lo reanuda. Safari solo lo permite dentro de un gesto.
+ */
+export function installGestureUnlock() {
+  if (typeof window === 'undefined' || window.__samplrkUnlock) return
+  window.__samplrkUnlock = true
+  const kick = () => {
+    if (!ctx || ctx.state === 'running') return
+    unlockAudio().catch(() => { /* lo reporta audioState */ })
+  }
+  for (const type of ['pointerdown', 'pointerup', 'touchend', 'keydown']) {
+    window.addEventListener(type, kick, { capture: true, passive: true })
+  }
+}
+
 /** Reanuda sin esperar (para el camino crítico de los pads). */
 export function ensureRunning() {
   const c = getCtx()

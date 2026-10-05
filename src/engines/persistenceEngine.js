@@ -67,10 +67,21 @@ export function deleteProjectRecord(id) { return run('projects', 'readwrite', s 
 
 // ---------------------------------------------------------------- audio
 
-export function putAudio(id, blob, name = '') {
-  return run('audio', 'readwrite', s => s.put({ id, blob, name, type: blob.type }))
+export async function putAudio(id, blob, name = '') {
+  try {
+    return await run('audio', 'readwrite', s => s.put({ id, blob, name, type: blob.type }))
+  } catch (err) {
+    if (err?.message?.includes('espacio')) throw err
+    // algunos Safari no guardan Blob en IndexedDB: se guardan los bytes
+    const bytes = await blob.arrayBuffer()
+    return run('audio', 'readwrite', s => s.put({ id, bytes, name, type: blob.type }))
+  }
 }
-export function getAudio(id) { return run('audio', 'readonly', s => s.get(id)) }
+export async function getAudio(id) {
+  const rec = await run('audio', 'readonly', s => s.get(id))
+  if (rec && !rec.blob && rec.bytes) rec.blob = new Blob([rec.bytes], { type: rec.type || 'application/octet-stream' })
+  return rec
+}
 export function deleteAudio(id) { return run('audio', 'readwrite', s => s.delete(id)) }
 
 // ---------------------------------------------------------------- meta

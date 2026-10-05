@@ -3,7 +3,7 @@
 /* ------------------------------------------------------------ home */
 
 .home {
-  min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: var(--s-7) var(--s-4);
 }
 .home-logo {

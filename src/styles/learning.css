@@ -24,7 +24,7 @@
 .mission-actions { margin-top: var(--s-4); }
 .mission.is-done {
   padding: var(--s-4); border-radius: var(--r-lg);
-  background: var(--active-soft); border: 1px solid color-mix(in srgb, var(--active) 40%, transparent);
+  background: var(--active-soft); border: 1px solid rgba(79, 224, 138, 0.4); border-color: color-mix(in srgb, var(--active) 40%, transparent);
 }
 .mission.is-done .screen-title { font-size: clamp(20px, 3vw, 26px); }
 .mission-fact {
@@ -73,7 +73,7 @@
 
 @media (max-width: 760px) {
   .mission-dots { display: none; }
-  .progress-panel { position: fixed; left: 12px; right: 12px; top: 104px; width: auto; max-height: calc(100dvh - 120px); overflow: auto; }
+  .progress-panel { position: fixed; left: 12px; right: 12px; top: 104px; width: auto; max-height: calc(100vh - 120px); max-height: calc(100dvh - 120px); overflow: auto; }
   .insp-reveal span { display: none; }
   .mission-actions .btn { flex: 1 1 auto; }
 }
