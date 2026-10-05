@@ -1,14 +1,90 @@
 /**
  * audioEngine.js — audio_engine
- * AudioContext único, transporte compartido (BPM + compases) y scheduler
- * cuantizado: ningún loop entra ni sale fuera del compás.
+ * AudioContext único, master bus con limitador, desbloqueo del audio,
+ * preescucha y el transporte compartido (BPM + compases) de la v0.1.
+ *
+ * Tres tipos de reproducción conviven sin pisarse:
+ *   preview  → escuchar el sample (una voz, opcionalmente en bucle) — aquí
+ *   pads     → samplerEngine.js (polifónico)
+ *   loops    → transporte legacy (escenas/timeline) — aquí
  */
 
 let ctx = null
+let master = null    // { input: GainNode, limiter: DynamicsCompressorNode }
+
+const audioListeners = new Set()
+let audioState = 'idle' // idle | suspended | running | closed | unsupported
+
+function setAudioState(s) {
+  if (s === audioState) return
+  audioState = s
+  audioListeners.forEach(fn => fn())
+}
 
 export function getCtx() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)()
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext
+    if (!AC) { setAudioState('unsupported'); throw new Error('Web Audio no disponible') }
+    ctx = new AC({ latencyHint: 'interactive' })
+    ctx.onstatechange = () => setAudioState(ctx.state)
+    setAudioState(ctx.state)
+  }
   return ctx
+}
+
+/**
+ * Entrada del master bus. Todo lo que suena pasa por aquí:
+ * ganancia general → limitador suave → altavoces.
+ * Evita la saturación cuando suenan muchos pads a la vez.
+ */
+export function getMasterInput() {
+  const c = getCtx()
+  if (!master) {
+    const input = c.createGain()
+    input.gain.value = 0.8
+    const limiter = c.createDynamicsCompressor()
+    limiter.threshold.value = -4
+    limiter.knee.value = 2
+    limiter.ratio.value = 20
+    limiter.attack.value = 0.002
+    limiter.release.value = 0.12
+    input.connect(limiter)
+    limiter.connect(c.destination)
+    master = { input, limiter }
+  }
+  return master.input
+}
+
+export function setMasterVolume(v) {
+  getMasterInput().gain.setTargetAtTime(Math.max(0, Math.min(1.5, v)), getCtx().currentTime, 0.02)
+}
+
+export function getAudioState() { return audioState }
+export function subscribeAudioState(fn) { audioListeners.add(fn); return () => audioListeners.delete(fn) }
+
+/**
+ * Desbloquea el audio. Debe llamarse dentro de un gesto del usuario
+ * (pulsar un botón). En iOS además hace sonar un buffer silencioso.
+ * Devuelve el estado final ('running' si todo va bien).
+ */
+export async function unlockAudio() {
+  const c = getCtx()
+  if (c.state === 'suspended' || c.state === 'interrupted') await c.resume()
+  const silent = c.createBuffer(1, 1, c.sampleRate)
+  const src = c.createBufferSource()
+  src.buffer = silent
+  src.connect(c.destination)
+  src.start(0)
+  getMasterInput()
+  setAudioState(c.state)
+  return c.state
+}
+
+/** Reanuda sin esperar (para el camino crítico de los pads). */
+export function ensureRunning() {
+  const c = getCtx()
+  if (c.state !== 'running') c.resume().catch(() => { /* lo reporta audioState */ })
+  return c
 }
 
 // ------------------------------------------------------------- transporte
@@ -103,7 +179,7 @@ export function scheduleLoopAt(loop, buffer, startAt, stopAt = null, vol = 1, pa
   } else {
     node.connect(gain)
   }
-  gain.connect(c.destination)
+  gain.connect(getMasterInput())
   src.start(startAt)
   if (stopAt !== null) src.stop(stopAt)
   return { src, gain, pan: panner, loop }
@@ -177,23 +253,53 @@ export function launchScene(scene, loops, getBuffer) {
 
 // ------------------------------------------------------------- previews
 
-let previewSrc = null
+let preview = null   // { src, startedAt, offset, rate, loop, loopStart, loopEnd, duration }
+const previewListeners = new Set()
+function notifyPreview() { previewListeners.forEach(fn => fn()) }
 
-/** Preescucha un buffer (o un tramo) sin cuantizar; corta la preescucha anterior. */
-export function playPreview(buffer, { offset = 0, duration = null, rate = 1 } = {}) {
-  const c = getCtx()
-  if (c.state === 'suspended') c.resume()
+/**
+ * Preescucha un buffer (o un tramo) sin cuantizar; corta la preescucha anterior.
+ * Con `loop: true` repite el tramo [offset, offset + duration] hasta que se pare.
+ */
+export function playPreview(buffer, { offset = 0, duration = null, rate = 1, loop = false } = {}) {
+  const c = ensureRunning()
   stopPreview()
   const src = c.createBufferSource()
   src.buffer = buffer
   src.playbackRate.value = rate
-  src.connect(c.destination)
-  duration === null ? src.start(0, offset) : src.start(0, offset, duration)
-  src.onended = () => { if (previewSrc === src) previewSrc = null }
-  previewSrc = src
+  src.connect(getMasterInput())
+  const dur = duration ?? buffer.duration - offset
+  const startedAt = c.currentTime + 0.01
+  if (loop) {
+    src.loop = true
+    src.loopStart = offset
+    src.loopEnd = offset + dur
+    src.start(startedAt, offset)
+  } else {
+    src.start(startedAt, offset)
+    src.stop(startedAt + dur / rate)
+  }
+  src.onended = () => { if (preview?.src === src) { preview = null; notifyPreview() } }
+  preview = { src, startedAt, offset, rate, loop, loopStart: offset, loopEnd: offset + dur, duration: dur }
+  notifyPreview()
   return src
 }
 
 export function stopPreview() {
-  if (previewSrc) { try { previewSrc.stop() } catch { /* noop */ } previewSrc = null }
+  if (preview) {
+    try { preview.src.stop() } catch { /* noop */ }
+    preview = null
+    notifyPreview()
+  }
+}
+
+export function isPreviewing() { return preview !== null }
+export function subscribePreview(fn) { previewListeners.add(fn); return () => previewListeners.delete(fn) }
+
+/** Posición actual de la preescucha en segundos del buffer (o null). Para playheads. */
+export function previewPosition() {
+  if (!preview || !ctx) return null
+  const elapsed = Math.max(0, ctx.currentTime - preview.startedAt) * preview.rate
+  if (preview.loop) return preview.loopStart + (elapsed % (preview.loopEnd - preview.loopStart))
+  return Math.min(preview.offset + elapsed, preview.offset + preview.duration)
 }
