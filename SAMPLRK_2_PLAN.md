@@ -552,3 +552,41 @@ Limitaciones conocidas:
 - La degradación es una simulación educativa, no la emulación de una máquina concreta (sin filtros de entrada/salida
   ni la cuantización no lineal de algunos modelos).
 - Activar Old School en un proyecto con más de 8 chops oculta los pads 9–16 (no los borra).
+
+## 16. Grid Lab — ordenar sin tocar en directo (cerrada)
+
+**Motivo:** la app giraba en torno a tocar pads y grabar en directo. Eso sigue ahí, pero ya no es el camino principal:
+después de Chop viene **Grid**, una rejilla tipo step sequencer (concepto de FL Studio, sin interfaz de DAW) donde se
+escribe el pattern con clics.
+
+Implementado:
+- `gridModel.js` (puro, 34 tests): la rejilla es una **vista del mismo pattern de chops**, no un formato nuevo; así Record,
+  Drums y Beat funcionan sin cambios. Resolución 1/4·1/8·1/16, 1/2/4 compases, celdas ↔ eventos, toma suelta → rejilla.
+- Pantalla **Grid** (`GridLab` + `StepGrid`), tras Play en el recorrido: filas = chops con su color, columnas = pasos; clic
+  = poner/quitar (arrastrar pinta, en táctil un toque, con teclado flechas + Espacio); play en bucle que se puede editar
+  mientras suena; tempo; compases; resolución; **Duplicar** (repite el patrón en los compases siguientes, 1→2→4, para variar
+  la segunda mitad); **Limpiar** (deshacible). Al sonar un golpe se ilumina su celda y su pad (cabecera de la fila).
+- **Grabación en directo → rejilla editable:** una toma (pendiente o guardada) con golpes fuera de rejilla muestra un aviso con
+  «Pasar a rejilla»; basta pulsar una celda para convertirla; desde Record, «Editar en la rejilla». Se elige la resolución más
+  gruesa en la que encaja la toma; dos golpes del mismo pad en el mismo paso se unen; todo en un único paso de deshacer.
+- **Camino principal:** Chop → «Ordénalos en la rejilla»; grabar en directo queda como enlace secundario y como práctica
+  **opcional** en la lista de progreso. **Misión 7 «Escribe tu frase en la rejilla»** (sustituye a «Graba lo que tocas»);
+  se cumple con ≥ 4 golpes y Play, y una frase que rompe el orden cuenta también como *flip*.
+- Las dos pistas siguen durando lo mismo: al cambiar los compases, la batería se repite o se recorta con el pattern.
+
+Decisiones:
+- **Duplicar** = repetir el patrón en los compases siguientes (no «pattern A/B»). Un proyecto sigue teniendo un pattern por
+  pista; las variaciones se hacen editando la segunda mitad.
+- Acortar los compases quita los golpes que quedan fuera (con aviso y deshacer) en vez de ocultarlos.
+- Los pads de la cabecera solo se oyen (`auditionPad`): no anotan, no seleccionan, no avisan al coach.
+
+Verificado (`npm test`; build; Chromium real a 1280 px y 375 px): A C C B con cuatro clics → eventos `[0,2,2,1]` en los beats
+`0 1 2 3`; playhead, celdas y pads iluminados al sonar; editar con el bucle sonando; duplicar/acortar/limpiar y Ctrl+Z; arrastre
+= un paso de deshacer; guardado y recarga; toma en directo con tiempos «humanos» → rejilla de pasos exactos; misión completada
+con flip; sin desbordamiento horizontal en móvil.
+
+Limitaciones conocidas:
+- La rejilla solo edita los chops; la batería se sigue grabando en directo (suena en el bucle y se ajusta de compases).
+- Un golpe por celda: sin velocity ni longitud editables desde la rejilla (las tomas en directo conservan su velocity).
+- Con 4 compases a 1/16 hay 64 pasos: la rejilla se desplaza en horizontal y el playhead pasa de página solo.
+

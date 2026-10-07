@@ -1,7 +1,8 @@
 # SAMPLRK — Arquitectura
 
 > **SAMPLRK 2**: «Nunca he sampleado. Enséñame haciéndolo.»
-> Escuchar → Encontrar → Cortar → Choppear → Tocar → (Grabar → Transformar → Batería → Beat)
+> Escuchar → Encontrar → Cortar → Choppear → Tocar → **Ordenar (Grid)** → Transformar → Batería → Beat
+> Grabar en directo sigue disponible, como opción: lo grabado se convierte en rejilla editable.
 
 La interfaz v0.1 (Archivo → Loop → Escenas → Timeline) sigue disponible en `#/legacy`.
 El plan por fases está en [SAMPLRK_2_PLAN.md](SAMPLRK_2_PLAN.md).
@@ -32,6 +33,7 @@ ui/ (React)  ──llama──▶  actions/  ──▶  engines/ (sin React)
 | **Sample** | `sampleEngine.js` | `EditableSample` (sin cambios de v0.1) y registro runtime `id → AudioBuffer`. |
 | **Slices** | `sliceModel.js` | Puro. Crear (iguales / en golpes), dividir, unir, borrar, mover bordes enlazados; banco de 16 pads que referencia slices por id; orden original para el coach. |
 | **Patterns** | `patternEngine.js` | Puro. Eventos en beats (no audio), quantize no destructivo, ventanas para el scheduler, tap tempo y BPM inicial. |
+| **Grid** | `gridModel.js` | Puro. La rejilla de pasos como *vista* del pattern de chops (no es otro formato): resoluciones 1/4·1/8·1/16, 1/2/4 compases, celdas ↔ eventos (`gridCells`, `setStep`), toma suelta → rejilla (`isLoose`, `snapPattern`, `suggestResolution`), `resizePattern` (acortar recorta, alargar vacía o repite), `duplicatePattern` y `gridView` (todo lo que la pantalla necesita). |
 | **Secuenciador** | `sequencer.js` | Scheduler *lookahead* (25 ms / 120 ms) sobre el reloj del AudioContext: cuenta atrás, grabación y bucle; cambio de tempo sin saltos. La UI consulta `position()` por rAF y solo se suscribe a cambios de fase. |
 | **Batería** | `drumKit.js` | Kit sintetizado (bombo, caja, charles cerrado/abierto), teclas J K L Ñ, choke del charles; cada pieza se toca como un slice en el mismo sampler. |
 | **Plan del beat** | `beatPlan.js` | Puro. Golpes de chops + batería con su hora y su corte (re-disparo y choke); resumen objetivo del beat. |
@@ -62,6 +64,7 @@ Slice    { id, sampleId, start, end, name, color, pitch, gain, reversed,
            triggerMode: 'oneshot', fadeInMs, fadeOutMs, keyBinding, midiNote }
 PadBank  { id, name, pads: (sliceId | null)[16] }
 Pattern  { id, name, kind: 'chops'|'drums', bars, bpm, quantize: 'off'|'1/4'|'1/8'|'1/16',
+           grid?: '1/4'|'1/8'|'1/16',   // resolución con la que se editó en el Grid Lab (opcional)
            events: [{ id, padId, beat, time, duration, velocity }] }
 ```
 
@@ -72,6 +75,11 @@ En `drums`, `padId` es la pieza del kit ('kick', 'snare', 'hat', 'open'). Las do
 (1 = 33 rpm, 1,35 = 45 rpm) completan el modelo. **Audio que suena** = `getPlayableBuffer(sampleId)`: el original o, en
 Old School, un derivado degradado y cacheado; cada voz multiplica su rate por la velocidad de su sample (`playableSlice`).
 Resamplear crea un proyecto nuevo cuyo sample es el beat renderizado (guardado como WAV).
+
+**Rejilla = el mismo pattern.** Una celda encendida es un evento de `chops` cuyo `beat` cae exactamente en un paso
+(`beat = paso × duración del paso`). Lo escrito con clics suena igual en Record, Drums y Beat; y una toma en directo
+(eventos fuera de rejilla) se «pega» al paso más cercano para poder editarla (`snapPattern`, un solo paso de deshacer).
+Mientras la toma esté suelta, las celdas enseñan dónde quedaría y un aviso ofrece pasarla a rejilla.
 
 Un evento de pattern guarda el **pad** y el **beat** de tu toma original: nunca audio. El quantize se aplica al
 reproducir, así que «Original» siempre está disponible. Al reproducir, cada evento busca qué chop hay en su pad,
@@ -86,7 +94,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | `projectStore` | Proyecto + historial de deshacer/rehacer por snapshots (los gestos continuos se agrupan por `key`) | Sí: autoguardado (el historial no) |
 | `uiStore` | Pantalla, chop seleccionado, herramienta, toasts, «ocupado» | No |
 | `midiStore` | Estado MIDI (activado, dispositivos, último golpe, aprendiendo), mapa nota → pad | El mapa y «activado» (preferencia del equipo) |
-| `recorderStore` | Toma pendiente (antes de «Quedármela»), compases, cuenta atrás, metrónomo | Solo las preferencias |
+| `recorderStore` | Toma pendiente (antes de «Quedármela»), compases y resolución de la rejilla (mientras no hay pattern), cuenta atrás, metrónomo | Solo las preferencias |
 | `learningStore` | Progreso (`findComplete`… `resampleComplete`), misiones saltadas y cerradas, «explorando», mensajes vistos, coach on/off | Sí (global, no por proyecto) |
 
 `createStore()` es el mismo patrón `useSyncExternalStore` de v0.1, sin dependencias.
@@ -99,6 +107,7 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 | Find | `SourcePicker` (cajas de discos de práctica + importar) |
 | Find + Cut + Loop | `CutLab` (escuchar → «Aquí hay algo» → INICIO/FIN → Repetir → «Este es mi sample») |
 | Chop + Play | `ChopLab`, `ChopTools`, `PadGrid`/`Pad`, `ChopInspector` |
+| Grid | `GridLab` (play en bucle, tempo, compases, resolución, duplicar, limpiar, aviso «pasar a rejilla»), `StepGrid` (filas = pads con el color del chop, celdas, playhead) |
 | Record / Drums | `RecordLab` (pista `chops` o `drums`), `TempoControl`, `PatternLane`, `DrumPads`, `MixPanel` (+ `TransportMini` en la barra superior) |
 | Beat | `BeatResult` (resumen, play, Exportar WAV, Resamplear) |
 | Old School | `OldSchool` (presets, ajustes, historia) y `MemoryMeter` en Cut/Chop/Record/Drums/Beat |
@@ -111,6 +120,10 @@ El color del chop es su identidad (onda, pad y, en Fase 2, pattern). La letra es
 lo que la misión ya explica. En Libre, cabeceras normales, todo visible y coach apagado por defecto.
 
 `Waveform` tiene dos capas: *base* (se redibuja al cambiar datos o vista) y *live* (rAF con `getLive()` → playheads + chops sonando).
+`StepGrid` pinta el playhead y el destello de cada celda con rAF (sin re-render); el destello de los pads es el mismo
+hook (`usePadFlash`) que el de `PadGrid`. El ratón actúa en `pointerdown` y pinta al arrastrar (un arrastre = un paso de
+deshacer); el toque actúa al soltar para no chocar con el desplazamiento; el teclado usa flechas + Espacio.
+
 Los pads suenan en `pointerdown`; el teclado usa `click` (Enter/Espacio con foco) y el mapa global de teclas.
 
 Estilos: `styles/tokens.css` (design system), `base.css`, `screens.css`, `pads.css`. Sin estilos inline salvo valores dinámicos (color de chop, anchuras).
@@ -139,4 +152,4 @@ Web MIDI solo en Chrome. Safari: alternativas `webkit*`, CSS sin `dvh`/`color-mi
 
 ## Tests
 
-`vitest` sobre funciones puras: DSP, WAV, slices, pitch, teclado, historial, coach, pistas de corte, modelo de proyecto e importación. Lo que depende de Web Audio (sampler, síntesis de práctica) se verifica en navegador.
+`vitest` sobre funciones puras: DSP, WAV, slices, rejilla (Grid), pitch, teclado, historial, coach, pistas de corte, modelo de proyecto e importación. Lo que depende de Web Audio (sampler, síntesis de práctica) se verifica en navegador.
