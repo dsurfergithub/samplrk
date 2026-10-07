@@ -13,13 +13,14 @@ const STEPS = [
   { id: 'cut', label: 'Cut', screen: 'cut', done: 'cutComplete', needs: 'sample' },
   { id: 'chop', label: 'Chop', screen: 'chop', done: 'chopComplete', needs: 'sample' },
   { id: 'play', label: 'Play', screen: 'chop', done: 'playComplete', needs: 'sample' },
+  { id: 'grid', label: 'Grid', screen: 'grid', done: 'gridComplete', needs: 'sample' },
   { id: 'record', label: 'Record', screen: 'record', done: 'recordComplete', needs: 'sample' },
   { id: 'flip', label: 'Flip', screen: 'chop', done: 'flipComplete', needs: 'sample' },
   { id: 'drums', label: 'Drums', screen: 'drums', done: 'drumsComplete', needs: 'sample' },
   { id: 'beat', label: 'Beat', screen: 'beat', done: 'beatComplete', needs: 'sample' },
 ]
 
-const CURRENT = { source: 'find', cut: 'cut', chop: 'chop', record: 'record', drums: 'drums', beat: 'beat' }
+const CURRENT = { source: 'find', cut: 'cut', chop: 'chop', grid: 'grid', record: 'record', drums: 'drums', beat: 'beat' }
 
 export default function StepBar() {
   const screen = useUi(s => s.screen)

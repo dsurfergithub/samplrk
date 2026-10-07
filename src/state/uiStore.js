@@ -4,7 +4,7 @@
 import { createStore } from './createStore'
 
 const store = createStore({
-  screen: 'home',          // home | source | cut | chop | record | drums | beat
+  screen: 'home',          // home | source | cut | chop | grid | record | drums | beat
   selectedSliceId: null,   // chop seleccionado (pad ↔ segmento)
   chopTool: 'select',      // select | cut  ("Yo corto": tocar la onda añade un corte)
   busy: null,              // texto de operación en curso

@@ -92,8 +92,8 @@ export default function ChopLab() {
             {selected && <ChopInspector slice={selected} letter={padLetter(pads.indexOf(selected.id))} />}
           </div>
           {!missionHere && <div className="next-bar">
-            <p>¿Ya tienes una frase que te guste? Puedes seguir aquí experimentando todo lo que quieras.</p>
-            <button className="btn btn-primary" onClick={() => goto('record')}>Graba lo que tocas <ArrowRight size={16} /></button>
+            <p>¿Ya tienes una frase que te guste? Colócala en la rejilla y ajústala sin prisas. También puedes <button className="link-btn" onClick={() => goto('record')}>grabar lo que tocas en directo</button>.</p>
+            <button className="btn btn-primary" onClick={() => goto('grid')}>Ordénalos en la rejilla <ArrowRight size={16} /></button>
           </div>}
         </>
       )}

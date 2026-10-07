@@ -5,7 +5,7 @@
  * queda ajustada al ritmo (quantize), sin perder la original.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { Circle, Square, Play, Check, RotateCcw, X, Trash2, Timer, Music2, ArrowRight } from 'lucide-react'
+import { Circle, Square, Play, Check, RotateCcw, X, Trash2, Timer, Music2, ArrowRight, LayoutGrid } from 'lucide-react'
 import PadGrid from './PadGrid'
 import DrumPads from './DrumPads'
 import PatternLane from './PatternLane'
@@ -22,6 +22,7 @@ import {
   startRecording, stopPattern, togglePlay, keepTake, retryTake, discardTake, clearPattern,
   setQuantize, setMetronome, setCountIn, setBars, getBpm, lockedBars,
 } from '../actions/patternActions'
+import { editInGrid } from '../actions/gridActions'
 import { ensureKit } from '../actions/drumActions'
 import { setMetronomeVolume, getMetronomeVolume } from '../engines/metronomeEngine'
 import { lengthBeats } from '../engines/patternEngine'
@@ -167,6 +168,7 @@ export default function RecordLab({ track = 'chops' }) {
           <p><b>¿Te la quedas?</b> Escúchala en bucle y decide.</p>
           <div className="row">
             <button className="btn btn-primary" onClick={keepTake}><Check size={16} /> Quedármela</button>
+            {track === 'chops' && <button className="btn" onClick={editInGrid}><LayoutGrid size={16} /> Editar en la rejilla</button>}
             <button className="btn" onClick={retryTake}><RotateCcw size={16} /> Otra toma</button>
             <button className="btn btn-ghost" onClick={discardTake}><X size={16} /> Descartar</button>
           </div>
@@ -185,6 +187,9 @@ export default function RecordLab({ track = 'chops' }) {
                 </button>
               ))}
             </div>
+            {!showTake && track === 'chops' && saved(track) && (
+              <button className="btn" onClick={editInGrid}><LayoutGrid size={16} /> Editar en la rejilla</button>
+            )}
             {!showTake && saved(track) && (
               <button className="btn btn-ghost btn-danger" onClick={() => clearPattern(track)}>
                 <Trash2 size={16} /> {track === 'drums' ? 'Borrar batería' : 'Borrar pattern'}

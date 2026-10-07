@@ -60,16 +60,21 @@ export const MISSIONS = [
     fact: '«Flip» es como llaman los productores a darle la vuelta a un sample para que suene a algo nuevo.',
   },
   {
-    id: 'record', step: 'Record', covers: ['learned:pattern'], screens: ['record'], done: p => p.recordComplete,
-    title: 'Graba lo que tocas.',
-    sub: 'Pulsa Grabar, espera la cuenta atrás y toca tus pads. Después se repetirá en bucle.',
-    success: 'Has grabado tu primer pattern.',
-    fact: 'Las MPC de Akai (la primera, de 1988) se hicieron famosas por cómo se tocaban sus pads y por su manera de ajustar el ritmo.',
+    id: 'grid', step: 'Grid', covers: ['learned:pattern'], screens: ['grid'], done: p => p.gridComplete,
+    title: 'Escribe tu frase en la rejilla.',
+    sub: 'Cada fila es un chop y cada columna, un paso del ritmo. Pulsa una celda para poner un golpe y dale a Play. Por ejemplo:',
+    examples: ({ letters }) => {
+      const [a, b, c, d] = letters
+      if (!c) return []
+      return d ? [`${a} ${c} ${c} ${b}`, `${a} ${b} ${a} ${d}`] : [`${a} ${c} ${c} ${b}`]
+    },
+    success: 'Has escrito tu primer pattern sin tocar en directo: una lista de qué chop suena y en qué momento.',
+    fact: 'La Roland TR-808 (1980) se programaba así: paso a paso, con 16 botones, sin tocar en directo. Esa forma de escribir ritmos se hizo clásica.',
   },
   {
     id: 'pitch', step: 'Flip', covers: ['learned:pitch'], screens: ['chop'], done: p => p.pitchComplete,
     title: 'Cambia el pitch de un chop.',
-    sub: 'Elige un pad y baja su pitch. Si tu pattern está sonando, oirás el cambio dentro de la toma.',
+    sub: 'Elige un pad y baja su pitch. Si tu pattern está sonando, oirás el cambio al instante.',
     success: '¿Notas que también cambia la duración? Más grave es más largo; más agudo, más corto: así funcionaban los samplers clásicos.',
     fact: 'Para que cupiera más música en tan poca memoria, muchos productores sampleaban discos a 45 rpm en vez de 33 y luego bajaban el pitch.',
   },
@@ -113,9 +118,18 @@ export const UPCOMING = []
 export const CHECKLIST_LABELS = {
   find: 'Encontrar un momento', loop: 'Crear un loop', cut: 'Cortar un sample',
   chop: 'Crear chops', play: 'Tocar los pads', reorder: 'Hacer un flip (cambiar el orden)',
-  record: 'Grabar un pattern', pitch: 'Cambiar el pitch', reverse: 'Usar reverse',
+  grid: 'Escribir un pattern en la rejilla', pitch: 'Cambiar el pitch', reverse: 'Usar reverse',
   drums: 'Añadir batería', beat: 'Escuchar tu primer beat', resample: 'Resamplear',
 }
+
+/**
+ * Prácticas opcionales: no son misiones (nunca se piden ni bloquean nada),
+ * pero cuentan como «lo has probado» en la lista. Grabar en directo es una
+ * manera más de escribir un pattern, no el camino principal.
+ */
+export const OPTIONAL_PRACTICE = [
+  { id: 'record', label: 'Grabar en directo', done: p => p.recordComplete },
+]
 
 export const isDone = (m, progress, skipped = []) => !!m.done(progress) || skipped.includes(m.id)
 
@@ -159,6 +173,7 @@ export function checklist(progress, skipped = []) {
       id: m.id, label: CHECKLIST_LABELS[m.id],
       done: !!m.done(progress), skipped: skipped.includes(m.id) && !m.done(progress),
     })),
+    ...OPTIONAL_PRACTICE.map(o => ({ id: o.id, label: o.label, done: !!o.done(progress), optional: true })),
     ...UPCOMING.map(u => ({ id: u.id, label: u.label, done: false, upcoming: true })),
   ]
 }

@@ -48,7 +48,7 @@ export function flipKind(event, ctx = {}) {
   if (event.type === 'pad:hit') {
     return classifyPhrase(lastPhrase(ctx.hits ?? []), ctx.order ?? []) === 'flip' ? 'reorder' : null
   }
-  if (event.type === 'record:done') {
+  if (event.type === 'record:done' || event.type === 'grid:played') {
     if (event.kind === 'drums') return null
     return classifyPhrase(event.sequence ?? [], ctx.order ?? []) === 'flip' ? 'reorder' : null
   }
@@ -123,6 +123,12 @@ export function react(event, ctx = {}, seen = new Set()) {
       return once('learned:pattern', {
         kind: 'learned', term: 'pattern',
         text: `Has grabado tu primer pattern (${event.count} golpes). SAMPLRK no ha grabado audio: ha anotado qué pad tocaste y cuándo. Por eso, si cambias el pitch de un chop, la toma suena distinta al instante.`,
+      })
+
+    case 'grid:played':
+      return once('learned:pattern', {
+        kind: 'learned', term: 'pattern',
+        text: `Has escrito tu primer pattern (${event.count} golpes). SAMPLRK no guarda audio: anota qué chop suena y en qué paso. Por eso, si cambias el pitch de un chop, tu pattern suena distinto al instante.`,
       })
 
     case 'oldschool:on':

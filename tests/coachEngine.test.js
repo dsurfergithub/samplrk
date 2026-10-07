@@ -100,6 +100,15 @@ describe('coach: grabación y quantize', () => {
     expect(flipKind({ type: 'record:done', sequence: [2, 2, 0, 3] }, { order: ORDER })).toBe('reorder')
     expect(flipKind({ type: 'record:done', sequence: [0, 1, 2, 3] }, { order: ORDER })).toBeNull()
   })
+  it('una frase escrita en la rejilla explica el pattern y cuenta como flip si rompe el orden', () => {
+    const m = react({ type: 'grid:played', count: 4, sequence: [0, 2, 2, 1] })
+    expect(m.id).toBe('learned:pattern')
+    expect(m.text).toContain('4 golpes')
+    expect(react({ type: 'grid:played', count: 4, sequence: [0, 2, 2, 1] }, {}, new Set([m.id]))).toBeNull()
+    expect(flipKind({ type: 'grid:played', sequence: [0, 2, 2, 1] }, { order: ORDER })).toBe('reorder')
+    expect(flipKind({ type: 'grid:played', sequence: [0, 1, 2, 3] }, { order: ORDER })).toBeNull()
+    expect(flipKind({ type: 'grid:played', sequence: [1, 1, 1, 1] }, { order: ORDER })).toBeNull() // repetir un solo chop es otra cosa
+  })
   it('quantize se explica después de usarlo, y el groove al volver a Original', () => {
     expect(react({ type: 'quantize:off' })).toBeNull()
     const seen = new Set()

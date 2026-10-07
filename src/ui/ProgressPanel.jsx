@@ -18,8 +18,9 @@ export default function ProgressPanel() {
   const skipped = useLearning(s => s.skipped)
   const mode = useProject(p => p.mode)
   const items = checklist(progress, skipped)
-  const doneCount = items.filter(i => i.done).length
-  const total = items.filter(i => !i.upcoming).length
+  const counted = items.filter(i => !i.upcoming && !i.optional) // lo opcional no suma ni resta
+  const doneCount = counted.filter(i => i.done).length
+  const total = counted.length
 
   useEffect(() => {
     if (!open) return
@@ -50,6 +51,7 @@ export default function ProgressPanel() {
                 <span>{i.label}</span>
                 {i.skipped && <small>saltada</small>}
                 {i.upcoming && <small>pronto</small>}
+                {i.optional && <small>opcional</small>}
               </li>
             ))}
           </ul>

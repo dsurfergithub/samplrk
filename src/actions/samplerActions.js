@@ -162,21 +162,34 @@ export function sortPadsByTime() {
 
 // ---------------------------------------------------------------- tocar
 
-/** Toca el pad `index`. Camino crítico: sin esperas, sin React antes del audio. */
-export function hitPad(index, velocity = 1) {
+/** Dispara el pad `index` y devuelve { id, voice }, o null si está vacío. Sin efectos secundarios. */
+function playPad(index, velocity) {
   const p = getProject()
   const id = bank(p).pads[index]
-  if (!id) return
+  if (!id) return null
   const slice = sliceById(id, p)
   const buffer = slice && getPlayableBuffer(slice.sampleId, p)
-  if (!slice || !buffer) return
-  const voice = triggerSlice(buffer, playableSlice(slice, p), { padKey: index, velocity })
+  if (!slice || !buffer) return null
+  return { id, voice: triggerSlice(buffer, playableSlice(slice, p), { padKey: index, velocity }) }
+}
+
+/** Toca el pad `index`. Camino crítico: sin esperas, sin React antes del audio. */
+export function hitPad(index, velocity = 1) {
+  const hit = playPad(index, velocity)
+  if (!hit) return
+  const { id, voice } = hit
   // después del sonido: grabación (si la hay), selección y coach
   if (voice) captureHit('chops', index, voice.startAt, voice.endAt - voice.startAt, velocity)
   select(id)
   recordHit(index)
   notify({ type: 'pad:hit', pad: index })
 }
+
+/**
+ * Suena un pad para oírlo, sin anotarlo: ni grabación, ni selección, ni coach.
+ * Lo usa la rejilla (Grid Lab) al poner un golpe o tocar la cabecera de una fila.
+ */
+export function auditionPad(index, velocity = 1) { playPad(index, velocity) }
 
 /** Toca el chop `sliceId` (clic en su segmento de la onda). */
 export function hitSlice(sliceId) {

@@ -24,6 +24,7 @@ const PROGRESS_BY_EVENT = {
   'cut:confirmed': ['findComplete', 'cutComplete'],
   'loop:on': ['loopComplete'],
   'chops:created': ['chopComplete'],
+  'grid:played': ['gridComplete'],
   'pitch:changed': ['pitchComplete'],
   'reverse:on': ['reverseComplete'],
   'beat:played': ['beatComplete'],

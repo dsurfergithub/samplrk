@@ -19,7 +19,7 @@ describe('misiones', () => {
 
   it('al terminar todas no hay misión actual', () => {
     const all = P(['findComplete', 'loopComplete', 'cutComplete', 'chopComplete', 'playComplete',
-      'reorderComplete', 'recordComplete', 'pitchComplete', 'reverseComplete', 'drumsComplete', 'beatComplete', 'resampleComplete'])
+      'reorderComplete', 'gridComplete', 'pitchComplete', 'reverseComplete', 'drumsComplete', 'beatComplete', 'resampleComplete'])
     expect(currentMission(all)).toBeNull()
   })
 
@@ -46,6 +46,28 @@ describe('misiones', () => {
     const reorder = MISSIONS.find(m => m.id === 'reorder')
     expect(resolve(reorder.examples, { letters: ['A', 'B', 'C', 'D'] })).toEqual(['A C B C', 'C C A D', 'A D A B'])
     expect(resolve(reorder.examples, { letters: ['A', 'B'] })).toEqual([])
+  })
+
+  it('después de Flip viene la rejilla, no la grabación en directo', () => {
+    const ids = MISSIONS.map(m => m.id)
+    expect(ids.indexOf('grid')).toBe(ids.indexOf('reorder') + 1)
+    expect(ids).not.toContain('record')
+    expect(currentMission(P(['findComplete', 'loopComplete', 'cutComplete', 'chopComplete', 'playComplete', 'reorderComplete'])).id).toBe('grid')
+  })
+
+  it('la misión de la rejilla propone A C C B con las letras del proyecto', () => {
+    const grid = MISSIONS.find(m => m.id === 'grid')
+    expect(grid.screens).toEqual(['grid'])
+    expect(resolve(grid.examples, { letters: ['A', 'B', 'C', 'D'] })).toEqual(['A C C B', 'A B A D'])
+    expect(resolve(grid.examples, { letters: ['A', 'B', 'C'] })).toEqual(['A C C B'])
+    expect(resolve(grid.examples, { letters: ['A', 'B'] })).toEqual([])
+  })
+
+  it('grabar en directo es práctica opcional: aparece en la lista pero no es misión', () => {
+    const list = checklist(P(['recordComplete']))
+    expect(list.find(x => x.id === 'record')).toMatchObject({ done: true, optional: true, label: 'Grabar en directo' })
+    expect(list.find(x => x.id === 'grid')).toMatchObject({ done: false })
+    expect(MISSIONS.some(m => m.id === 'record')).toBe(false)
   })
 
   it('la lista de progreso solo mide conceptos', () => {

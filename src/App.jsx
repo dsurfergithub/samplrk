@@ -11,6 +11,7 @@ import './styles/learning.css'
 import './styles/drums.css'
 import './styles/projects.css'
 import './styles/oldschool.css'
+import './styles/grid.css'
 import { Undo2, Redo2, Lightbulb, LightbulbOff } from 'lucide-react'
 import { useUi } from './state/uiStore'
 import { useEffect } from 'react'
@@ -29,6 +30,7 @@ import Home from './ui/Home'
 import SourcePicker from './ui/SourcePicker'
 import CutLab from './ui/CutLab'
 import ChopLab from './ui/ChopLab'
+import GridLab from './ui/GridLab'
 import RecordLab from './ui/RecordLab'
 import BeatResult from './ui/BeatResult'
 import OldSchool from './ui/OldSchool'
@@ -39,7 +41,7 @@ import Toast from './ui/Toast'
 import AudioGate from './ui/AudioGate'
 
 const DrumsScreen = () => <RecordLab track="drums" />
-const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab, record: RecordLab, drums: DrumsScreen, beat: BeatResult, oldschool: OldSchool }
+const SCREENS = { source: SourcePicker, cut: CutLab, chop: ChopLab, grid: GridLab, record: RecordLab, drums: DrumsScreen, beat: BeatResult, oldschool: OldSchool }
 
 export default function App() {
   const screen = useUi(s => s.screen)

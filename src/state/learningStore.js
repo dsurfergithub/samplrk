@@ -6,7 +6,7 @@ import { createStore } from './createStore'
 
 export const PROGRESS_KEYS = [
   'findComplete', 'cutComplete', 'loopComplete', 'chopComplete', 'playComplete',
-  'reorderComplete', 'recordComplete', 'flipComplete', 'pitchComplete', 'reverseComplete',
+  'reorderComplete', 'gridComplete', 'recordComplete', 'flipComplete', 'pitchComplete', 'reverseComplete',
   'drumsComplete', 'beatComplete', 'resampleComplete',
 ]
 
